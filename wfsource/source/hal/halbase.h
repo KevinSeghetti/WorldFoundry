@@ -122,7 +122,7 @@ extern DMalloc* _HALDmalloc;
 // this macro is machine specific
 
 // at least check for NULL
-#define VALIDATEPTR(ptr) assert(ptr)
+#define VALIDATEPTR(ptr) ValidatePtr(ptr)
 
 #define VALIDATESTRING(str) \
 {\

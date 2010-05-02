@@ -10,8 +10,8 @@ TextBuffer::TextBuffer( int width, int height )
 	_width = width;
 	_height = height;
 
-	_screen = (char*)malloc( _width * _height + 1000 );
-	assert( _screen );
+	_screen = (unsigned char*)malloc( _width * _height + 1000 );
+	ValidatePtr( _screen );
 
 	clear();
 	validate();
@@ -20,7 +20,7 @@ TextBuffer::TextBuffer( int width, int height )
 
 TextBuffer::~TextBuffer()
 {
-	assert( _screen );
+	ValidatePtr( _screen );
 	free( _screen );
 }
 
@@ -40,9 +40,9 @@ TextBuffer::clear()
 
 
 void
-TextBuffer::print( int x, int y, const char* msg, int nChars )
+TextBuffer::print( int x, int y, const unsigned char* msg, int nChars )
 {
-	strncpy( &_screen[ y*_width + x ], msg, nChars );
+	strncpy( (char*)&_screen[ y*_width + x ], (char *)msg, nChars );
 }
 
 

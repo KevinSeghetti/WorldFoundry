@@ -7,7 +7,7 @@ public:
 	TextBuffer( int width, int height );
 	~TextBuffer();
 
-	void print( int x, int y, const char* szMsg, int nChars );
+	void print( int x, int y, const unsigned char* szMsg, int nChars );
 	void clear();
 
 #pragma message( "Where to put?" )
@@ -19,7 +19,7 @@ public:
 protected:
 	int _width;
 	int _height;
-	char* _screen;
+	unsigned char* _screen;
 
 	void validate() const;
 };

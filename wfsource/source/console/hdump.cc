@@ -3,7 +3,7 @@
 #if defined(__PSX__)
 #	include <libetc.h>
 #endif
-static char
+static unsigned char
 charTable[256] =
 {
 	'.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.',
@@ -27,11 +27,11 @@ charTable[256] =
 //============================================================================
 
 ulong
-HDumpLine( char* buffer, size_t bufferSize, Console& console )
+HDumpLine( unsigned char* buffer, size_t bufferSize, Console& console )
 {
 	ulong i = bufferSize;
-	char* dataBuffer = buffer;
-	char ch;
+	unsigned char* dataBuffer = buffer;
+	unsigned char ch;
 	uint count = 0;
 	while(i--)					// first print hex #'s
 	 {
@@ -59,7 +59,7 @@ const unsigned int MAX_LINES = 24;
 const size_t MAX_BUFFER_SIZE = BYTES_PER_LINE * MAX_LINES;
 
 void
-HDump( char* title, void* buffer, size_t bufferSize, Console& console )
+HDump( unsigned char* title, void* buffer, size_t bufferSize, Console& console )
 {
 	console.clear();
 	console.print( "%s: addr $%x\n", title, buffer );
@@ -69,8 +69,8 @@ HDump( char* title, void* buffer, size_t bufferSize, Console& console )
 
 	ulong len;
 	ulong offset = 0;
-	char* dataBuffer = (char*)buffer;
-	assert(buffer);
+	unsigned char* dataBuffer = (unsigned char*)buffer;
+	ValidatePtr(buffer);
 
 	printf("buffersize %d\n", bufferSize);
 	while(bufferSize)

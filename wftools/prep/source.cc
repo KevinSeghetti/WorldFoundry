@@ -99,7 +99,7 @@ source::ApplyMacrosToLine(string& inputLine,map<string,macro,less<string> >& mac
 bool
 IsWhiteChar(char ch,const char* whiteChars)
 {
-	assert(whiteChars);
+	ValidatePtr(whiteChars);
 	while(*whiteChars)
 	{
 		if(ch == *whiteChars)
@@ -591,7 +591,7 @@ source::_ApplyMacrosToLine(string& inputLine,map<string,macro,less<string> >& ma
 						fileName.erase(0,offset);
 						includeDepth++;
 						OpenFile(fileName);
-						assert(input[includeDepth]);
+						ValidatePtr(input[includeDepth]);
 				 	}
 					else if(
                             token == "define" ||
@@ -873,7 +873,7 @@ void
 source::OpenFile(const string& filename)
 {
 	input[includeDepth] = new inputFile(filename.c_str());
-	assert(input[includeDepth]);
+	ValidatePtr(input[includeDepth]);
 	DBSTREAM2( cdebug << "Opened file <" << filename << ">" << endl; )
 }
 
@@ -886,7 +886,7 @@ source::construct(const string& newFileName)
 		input[i] = NULL;
 	includeDepth = 0;
 	OpenFile(newFileName);
-	assert(input[includeDepth]);
+	ValidatePtr(input[includeDepth]);
 	commentCount = 0;
 }
 
@@ -973,7 +973,7 @@ string
 source::FileNameAndLine(int incDepth)
 {
 	assert(incDepth <= includeDepth);
-	assert(input[incDepth]);
+	ValidatePtr(input[incDepth]);
 
 	string string;
 	char buffer[50];

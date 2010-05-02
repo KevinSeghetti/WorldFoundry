@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <pigsys/assert.hp>
+#include <pigsys/pigsys.hp>
 
 double theExpressionValue;
 char* _theExpression;
@@ -146,7 +146,7 @@ void
 addfunc( char* name, long (*func)(...) )
 {
     struct symtab* sp = symlook( name );
-    assert( sp );
+    ValidatePtr( sp );
     sp->funcptr = func;
 }
 
@@ -175,7 +175,7 @@ void yyreset();
 double
 eval( const char* szExpression, double (*fnSymbolLookup)( const char* szSymbolName ) )
 {
-	assert( szExpression );
+	ValidatePtr( szExpression );
         _theExpression = (char*)szExpression;
 
 	//assert( fnSymbolLookup );

@@ -42,7 +42,7 @@ inline int round( const int n, const int align )
 void
 IffWriterText::out_strstream( std::strstream& str )
 {
-	assert( _out );
+	ValidatePtr( _out );
 	unsigned char* sz = (unsigned char*)str.str();
 
 	int nChars = strlen( str.str() );	// not actually what I want
@@ -54,12 +54,12 @@ IffWriterText::out_strstream( std::strstream& str )
 void
 IffWriterText::out_int8( unsigned char i )
 {
-	assert( _out );
+	ValidatePtr( _out );
 	*_out << int( i ) << "y ";
 
 #if 0
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 	cs->size += sizeof( i );
 #endif
 }
@@ -68,13 +68,13 @@ IffWriterText::out_int8( unsigned char i )
 void
 IffWriterText::out_int16( unsigned short i )
 {
-	assert( _out );
+	ValidatePtr( _out );
 
 	*_out << int( i ) << "w ";
 
 #if 0
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 	cs->size += sizeof( i );
 #endif
 }
@@ -84,13 +84,13 @@ IffWriterText::out_int16( unsigned short i )
 void
 IffWriterText::out_int32( unsigned long i )
 {
-	assert( _out );
+	ValidatePtr( _out );
 
 	*_out << i << "l ";
 
 #if 0
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 	cs->size += sizeof( i );
 #endif
 }
@@ -99,13 +99,13 @@ IffWriterText::out_int32( unsigned long i )
 void
 IffWriterText::out_int32( int32 i )
 {
-	assert( _out );
+	ValidatePtr( _out );
 
 	*_out << i << "l ";
 
 #if 0
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 	cs->size += sizeof( i );
 #endif
 }
@@ -113,7 +113,7 @@ IffWriterText::out_int32( int32 i )
 void
 IffWriterText::out_scalar( const Scalar& s )
 {
-	assert( _out );
+	ValidatePtr( _out );
 
 	*_out << s;
 	if ( Scalar( s.WholePart(), 0 ) == s )
@@ -122,7 +122,7 @@ IffWriterText::out_scalar( const Scalar& s )
 
 #if 0
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 	cs->size += sizeof( int );
 #endif
 }
@@ -141,7 +141,7 @@ IffWriterText::align( int cbAlign )
 void
 IffWriterText::out_id( const ID& id )
 {
-	assert( _out );
+	ValidatePtr( _out );
 	*_out << id << ' ';
 }
 
@@ -151,7 +151,7 @@ void
 IffWriterText::out_string( const char* str )
 {
 	DBSTREAM1( ciff << "\"" << str << "\" "; )
-	assert( _out );
+	ValidatePtr( _out );
 
 	*_out << '"';
 	// break lines at CR/LF, convert " to \"
@@ -172,7 +172,7 @@ IffWriterText::out_string( const char* str )
 
 #if 0
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 	cs->size += strlen( str ) + 1;
 #endif
 }
@@ -183,7 +183,7 @@ void
 IffWriterText::out_string( const std::string& str )
 {
 	DBSTREAM1( ciff  << "\"" << str.c_str() << "\" "; )
-	assert( _out );
+	ValidatePtr( _out );
 
 	*_out << '"';
 	// break lines at CR/LF, convert " to \"
@@ -212,7 +212,7 @@ IffWriterText::out_string_continue( const std::string& str )
 void
 IffWriterText::out_mem( void* ptr, size_t size )
 {
-	assert( _out );
+	ValidatePtr( _out );
 
 	char* pMem = (char*)ptr;
 	char* pEnd = pMem + size;
@@ -231,7 +231,7 @@ IffWriterText::out_mem( void* ptr, size_t size )
 	out_comment( Comment( "" ) );
 
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 	cs->AddToSize(size);
 }
 
@@ -240,13 +240,13 @@ IffWriterText::out_mem( void* ptr, size_t size )
 void
 IffWriterText::out_int( long i )
 {
-	assert( _out );
+	ValidatePtr( _out );
 
 	*_out << int( i ) << " ";
 
 #if 0
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 	cs->size += sizeof( i );
 #endif
 }
@@ -263,7 +263,7 @@ IffWriterText::out_comment( const Comment& comment )
 void
 IffWriterText::enterChunk( const ID& id )
 {
-	assert( _out );
+	ValidatePtr( _out );
 
 	*_out << std::endl << tab( chunkSize.size() ) << "{ ";
 
@@ -276,10 +276,10 @@ IffWriterText::enterChunk( const ID& id )
 ChunkSizeBackpatch*
 IffWriterText::exitChunk()
 {
-	assert( _out );
+	ValidatePtr( _out );
 
 	ChunkSizeBackpatch* cs = _IffWriter::exitChunk();
-	assert( cs );
+	ValidatePtr( cs );
 
 	*_out << std::endl << tab( chunkSize.size() ) << "}";
 
@@ -299,5 +299,5 @@ IffWriterText::IffWriterText( std::ostream& out ) : _IffWriter()
 
 IffWriterText::~IffWriterText()
 {
-	assert( _out );
+	ValidatePtr( _out );
 }

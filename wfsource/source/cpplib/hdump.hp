@@ -28,7 +28,7 @@
 
 //============================================================================
 
-void HDump(void* buffer, ulong bufferSize, int indent=0,char* indentString = ">", std::ostream& out=std::cout,unsigned int charsPerLine=16);
+void HDump(void* buffer, ulong bufferSize, int indent=0,unsigned char* indentString = (unsigned char*)">", std::ostream& out=std::cout,unsigned int charsPerLine=16);
 
 //============================================================================
 #endif

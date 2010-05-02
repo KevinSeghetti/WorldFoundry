@@ -13,7 +13,7 @@ using namespace std;
 
 //============================================================================
 
-unsigned char
+static unsigned char
 charTable[256] =
 {
 	'.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.',
@@ -37,9 +37,9 @@ charTable[256] =
 //============================================================================
 
 ulong
-HDumpLine(char* buffer, ulong bufferSize,ostream& out,uint charsPerLine)
+HDumpLine(unsigned char* buffer, ulong bufferSize,ostream& out,uint charsPerLine)
 {
-	unsigned char* dataBuffer = (unsigned char*)buffer;
+	unsigned char* dataBuffer = buffer;
 	unsigned char ch;
 	uint count = 0;
 	// first print hex #'s
@@ -85,8 +85,8 @@ HDump(void* buffer, ulong bufferSize, int indent, char* indentString, ostream& o
 	ulong len;
 	ulong offset = 0;
 	int temp;
-	char* dataBuffer = (char*)buffer;
-	assert(buffer);
+	unsigned char* dataBuffer = (unsigned char*)buffer;
+	ValidatePtr(buffer);
 
 //	printf("buffersize %lu\n", bufferSize);
 	while(bufferSize)

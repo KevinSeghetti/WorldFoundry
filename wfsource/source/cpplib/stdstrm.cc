@@ -84,7 +84,7 @@ _RegisterStream( const char * fname, std::ostream * os )
 	DBSTREAM1( cdebug << "_RegisterStream( " << fname << ", " << (void *)os << " )" << std::endl; )
 	assert( gNumStreams < gMaxStreams );
 	gStreams[gNumStreams] = os;
-	assert( fname );
+	ValidatePtr( fname );
 	assert( strlen( fname ) + 1 < _MAX_PATH );
 	strcpy( gStreamNames[gNumStreams], fname );
 	gNumStreams++;

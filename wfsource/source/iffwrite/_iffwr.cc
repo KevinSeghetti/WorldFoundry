@@ -53,7 +53,7 @@ _IffWriter::_IffWriter()
 	_fillChar = 0;
 
 	ChunkSizeBackpatch* cs = new ChunkSizeBackpatch();
-	assert( cs );
+	ValidatePtr( cs );
 	//strcpy( cs->szID, "" );
 	chunkSize.push_back( cs );
 }
@@ -129,7 +129,7 @@ ID
 _IffWriter::chunkName() const
 {
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 	return cs->GetID();
 }
 
@@ -140,7 +140,7 @@ _IffWriter::enterChunk( const ID& id )
 	DBSTREAM1( ciff  << std::endl << tab( chunkSize.size() ) << "{ " << id << ' ' << std::endl; )
 
 	ChunkSizeBackpatch* csParent = chunkSize.back();
-	assert( csParent );
+	ValidatePtr( csParent );
 
 
     char name[256];
@@ -153,7 +153,7 @@ _IffWriter::enterChunk( const ID& id )
     //std::cout << "_IffWriter::enterChunk: name = " << name << std::endl;
 
 	ChunkSizeBackpatch* cs = new ChunkSizeBackpatch(id,int(_out->tellp())+4,-8,name);
-	assert( cs );
+	ValidatePtr( cs );
 //     cs->id = id;
 //     cs->size = -8;
 //     cs->pos = int(_out->tellp())+4;     // + chunkId
@@ -167,7 +167,7 @@ ChunkSizeBackpatch*
 _IffWriter::exitChunk()
 {
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 	chunkSize.pop_back();
 
 	_chunkIdList.push_back( cs );
@@ -181,7 +181,7 @@ ChunkSizeBackpatch*
 _IffWriter::exitChunk( const ID& id )
 {
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 #if !defined( NDEBUG )
 	if ( !( id == cs->GetID() ) )
 		std::cerr << "Ending chunk " << id << " but was expecting " << cs->GetID() << std::endl;
@@ -204,7 +204,7 @@ IffWriterText::out_file( const File& file )
         DBSTREAM1(cerror << "can't open file " << file.filename() << std::endl; )
 		throw;	//return false;
     }
-	assert( ptr );
+	ValidatePtr( ptr );
 
 	DBSTREAM1( ciff << "size=" << cbFile << ' '; )
 
@@ -232,7 +232,7 @@ IffWriterBinary::out_file( const File& file )
 		throw;	//return false;
 
     }
-	assert( ptr );
+	ValidatePtr( ptr );
 
 	DBSTREAM1( ciff << "size=" << cbFile << ' '; )
 
@@ -300,7 +300,7 @@ IffWriterText::alignFunction( int cbAlign )
 void
 IffWriterBinary::alignFunction( int cbAlign )
 {
-	assert( _out );
+	ValidatePtr( _out );
 	std::streampos pos = _out->tellp() % cbAlign;
 	if ( pos )
 		pos = cbAlign-pos;

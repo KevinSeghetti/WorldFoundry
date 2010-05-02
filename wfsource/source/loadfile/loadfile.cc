@@ -4,14 +4,14 @@
 
 #include <cstdlib>
 #include <cstdio>
-#include <pigsys/assert.hp>
+#include <pigsys/pigsys.hp>
 #include <cstring>
 
 #if 0
 static long
 ffilesize( FILE *fp )
 {
-	assert( fp );
+	ValidatePtr( fp );
 
 	long lSavedPos = ftell( fp );
 	fseek( fp, 0, SEEK_END );
@@ -55,7 +55,7 @@ LoadBinaryFile( const char* _szFilename, int32& nSize )
 	assert( !ferror( fp ) );
 
 	ptr = malloc( nSize );
-	assert( ptr );
+	ValidatePtr( ptr );
 	if ( ptr )
 	{
 		int cbRead = fread( ptr, 1, nSize, fp );
@@ -90,7 +90,7 @@ LoadTextFile( const char* _szFilename, int32& nSize )
 	assert( !ferror( fp ) );
 
 	ptr = (char*)malloc( nSize+1 );
-	assert( ptr );
+	ValidatePtr( ptr );
 	if ( ptr )
 		{
 		int cbRead = fread( ptr, 1, nSize, fp );

@@ -217,7 +217,7 @@ ShiftRightArithmetic(long& __sra1,long __sra0,long __sran)
 #if 1
 #define ShiftRightLogical(output,input,shift) \
    asm (                                      \
-   "shrl   %%cl,%1\n\t"                        \
+   "shr   %%cl,%1\n\t"                        \
    : "=g" (output)                            \
    : "0" (input), "c" (shift)                 \
    : "cc"                                     \
@@ -227,7 +227,7 @@ INLINE void
 ShiftRightLogical(long& __srl1,unsigned long __srl0,long __srln)
 {
 	asm (
-		"shrl	%%cl,%1\n\t"
+		"shr	%%cl,%1\n\t"
 		: "=g" (__srl1)
 		: "0" (__srl0), "c" (__srln)
    : "cc"                                       
@@ -239,7 +239,7 @@ ShiftRightLogical(unsigned long& __srl1,unsigned long __srl0,long __srln)
 {
 //	(__srl1 = WFShiftRightLogical(__srl0,__srln))
 	asm (
-		"shrl	%%cl,%1\n\t"
+		"shr	%%cl,%1\n\t"
 		: "=g" (__srl1)
 		: "0" (__srl0), "c" (__srln)
    : "cc"                                       

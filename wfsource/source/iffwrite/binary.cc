@@ -42,7 +42,7 @@ inline int round( const int n, const int align )
 void
 IffWriterBinary::out_strstream( std::strstream& str )
 {
-	assert( _out );
+	ValidatePtr( _out );
 	unsigned char* sz = (unsigned char*)str.str();
 
 	int nChars = strlen( str.str() );	// not actually what I want
@@ -55,12 +55,12 @@ IffWriterBinary::out_strstream( std::strstream& str )
 void
 IffWriterBinary::out_int8( unsigned char i )
 {
-	assert( _out );
+	ValidatePtr( _out );
 
 	_out->write( (char const*)&i, sizeof( i ) );
 
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 	cs->AddToSize(sizeof( i ));
 }
 
@@ -68,12 +68,12 @@ IffWriterBinary::out_int8( unsigned char i )
 void
 IffWriterBinary::out_int16( unsigned short i )
 {
-	assert( _out );
+	ValidatePtr( _out );
 
 	_out->write( (char const*)&i, sizeof( i ) );
 
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 	cs->AddToSize(sizeof( i ));
 }
 
@@ -82,12 +82,12 @@ IffWriterBinary::out_int16( unsigned short i )
 void
 IffWriterBinary::out_int32( unsigned long i )
 {
-	assert( _out );
+	ValidatePtr( _out );
 
 	_out->write( (char const*)&i, sizeof( i ) );
 
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 	cs->AddToSize(sizeof( i ));
 }
 #endif
@@ -95,7 +95,7 @@ IffWriterBinary::out_int32( unsigned long i )
 void
 IffWriterBinary::out_int32( int32 i )
 {
-	assert( _out );
+	ValidatePtr( _out );
 	long before = long(_out->tellp());
 	DBSTREAM1( ciff << "IFFWriterBinary::out_int32: value = " << i << ", streampos before = " << before;)
 
@@ -105,7 +105,7 @@ IffWriterBinary::out_int32( int32 i )
 	DBSTREAM1( ciff << ", sizeof(int32) = " << sizeof(i) << ", streampos after = " << _out->tellp() << std::endl;)
 
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 	cs->AddToSize(sizeof( i ));
 	assert(long(_out->tellp()) == (before+sizeof(i)));
 }
@@ -121,11 +121,11 @@ IffWriterBinary::out_scalar( const Scalar& s )
    int size = sizeof(Scalar);
    const char* data = (const char*)&s;
 
-	assert( _out );
+	ValidatePtr( _out );
    _out->write(data,size);
 
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 	cs->AddToSize(sizeof( size ));
 }
 
@@ -139,7 +139,7 @@ IffWriterBinary::align( int cbAlign )
 	DBSTREAM1( ciff << "IFFWriterBinary::align: streampos before: " <<  _out->tellp(); )
 
 	assert( 0 <= cbAlign && cbAlign <= 4 );
-	assert( _out );
+	ValidatePtr( _out );
 	std::streampos pos = _out->tellp() % 4;
 	_out->write( (const char*)&zero, pos ? 4-pos : 0 );
 	DBSTREAM1( ciff << ", streampos after: " <<  _out->tellp(); )
@@ -151,7 +151,7 @@ IffWriterBinary::out_id( const ID& id )
 {
 	DBSTREAM1( ciff << "IFFWriterBinary::out_id: value = " << id << std::endl; )
 
-	assert( _out );
+	ValidatePtr( _out );
 	align( 4 );
 	out_int32( id() );
 }
@@ -217,16 +217,16 @@ void
 IffWriterBinary::out_string( const char* str )
 {
 	DBSTREAM1( ciff << "\"" << str << "\" "; )
-	assert( _out );
+	ValidatePtr( _out );
 
 	char* sz = strdup( str );
-	assert( sz );
+	ValidatePtr( sz );
 	int len;
 	translate_escape_codes( sz, len );
 	_out->write( sz, strlen( sz ) + 1 );
 
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 	cs->size += strlen( sz ) + 1;
 
 	free( sz );
@@ -238,16 +238,16 @@ void
 IffWriterBinary::out_string( const std::string& str )
 {
 	DBSTREAM1( ciff << "IffWriterBinary::out_string: \"" << str.c_str() << "\" "; )
-	assert( _out );
+	ValidatePtr( _out );
 
 	char* sz = strdup( str.c_str() );
 	//cout << "IWB::os: translate escape codes
-	assert( sz );
+	ValidatePtr( sz );
 	translate_escape_codes( sz);
 	_out->write( sz, strlen( sz ) + 1 );
 
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 	cs->AddToSize(strlen( sz ) + 1);
 
 	free( sz );
@@ -258,9 +258,9 @@ void
 IffWriterBinary::out_string_continue( const std::string& str )
 {
 	// backup single character (since we already 0 terminated the string)
-	assert( _out );
+	ValidatePtr( _out );
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 	cs->SubtractFromSize(1);
 	_out->seekp( -1, std::ios::cur );
 	out_string( str );
@@ -270,15 +270,15 @@ IffWriterBinary::out_string_continue( const std::string& str )
 void
 IffWriterBinary::out_mem( void* ptr, size_t size )
 {
-	assert( _out );
-	assert( ptr );
+	ValidatePtr( _out );
+	ValidatePtr( ptr );
     assert(size > 0);
     assert(size < 10000000);     // kts arbitrary
 
 	_out->write( (const char*)ptr, size );
 
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 	cs->AddToSize(size);
 }
 
@@ -287,12 +287,12 @@ IffWriterBinary::out_mem( void* ptr, size_t size )
 void
 IffWriterBinary::out_int( long i )
 {
-	assert( _out );
+	ValidatePtr( _out );
 
 	_out->write( (char const*)&i, sizeof( i ) );
 
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 	cs->AddToSize(sizeof( i ));
 }
 #endif
@@ -307,14 +307,14 @@ IffWriterBinary::out_comment( const Comment& comment )
 void
 IffWriterBinary::enterChunk( const ID& id )
 {
-	assert( _out );
+	ValidatePtr( _out );
 
 	_IffWriter::enterChunk( id );
 
 	DBSTREAM1( ciff << "entering chunk " << id << ", file position = " << _out->tellp() << std::endl; )
 
 	ChunkSizeBackpatch* cs = chunkSize.back();
-	assert( cs );
+	ValidatePtr( cs );
 
 	*this << id;
 	*this << ~0UL;
@@ -325,12 +325,12 @@ IffWriterBinary::enterChunk( const ID& id )
 ChunkSizeBackpatch*
 IffWriterBinary::exitChunk()
 {
-	assert( _out );
+	ValidatePtr( _out );
 
 	DBSTREAM1( ciff << "IffWriterBinary::exitChunk:" << std::endl; )
 
 	ChunkSizeBackpatch* cs = _IffWriter::exitChunk();
-	assert( cs );
+	ValidatePtr( cs );
 
 	int pos = _out->tellp();
 
@@ -347,7 +347,7 @@ IffWriterBinary::exitChunk()
 	if ( !chunkSize.empty() )
 	{
 		ChunkSizeBackpatch* csParent = chunkSize.back();
-	    assert( cs );
+	    ValidatePtr( cs );
 		int remainder = cs->GetSize() % 4;
         if(cs->GetSize() > 0)
 		    csParent->AddToSize(cs->GetSize());
@@ -371,6 +371,6 @@ IffWriterBinary::IffWriterBinary( std::ostream& out ) : _IffWriter()
 
 IffWriterBinary::~IffWriterBinary()
 {
-	assert( _out );
+	ValidatePtr( _out );
 }
 

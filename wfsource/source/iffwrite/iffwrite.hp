@@ -53,8 +53,8 @@ public:
 	//Comment( const char* szComment )	{ assert( szComment ); _str = string( szComment ); }
 
 	Comment()							{ _szComment = strdup( "" ); }
-	Comment( const char* szComment )	{ assert( szComment ); _szComment = szComment; }
-	const char* operator()() const		{ assert( _szComment ); return _szComment; }
+	Comment( const char* szComment )	{ ValidatePtr( szComment ); _szComment = szComment; }
+	const char* operator()() const		{ ValidatePtr( _szComment ); return _szComment; }
 
 protected:
 	const char* _szComment;
@@ -81,19 +81,19 @@ class File
 public:
 	File( const char* szFilename, long startPos = 0, long length = -1 )
 	{
-		assert( szFilename );
+		ValidatePtr( szFilename );
 		_szFilename = strdup( szFilename );
-		assert( _szFilename );
+		ValidatePtr( _szFilename );
 		_startPos = startPos;
 		_length = length;
 	}
 	~File()
 	{
-		assert( _szFilename );
+		ValidatePtr( _szFilename );
 		free( _szFilename );
 	}
 
-	const char* filename() const	{ assert( _szFilename ); return _szFilename; }
+	const char* filename() const	{ ValidatePtr( _szFilename ); return _szFilename; }
 	int startPos() const			{ return _startPos; }
 	long length() const				{ return _length; }
 

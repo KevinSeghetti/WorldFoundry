@@ -18,16 +18,16 @@ public:
 		va_end( pArg );
 
 		_szComment = strdup( _szBuf );
-		assert( _szComment );
+		ValidatePtr( _szComment );
 
 	}
 	~PrintF()
 	{
-		assert( _szComment );
+		ValidatePtr( _szComment );
 		free( _szComment );
 	}
 
-	const char* operator()() const		{ assert( _szComment ); return _szComment; }
+	const char* operator()() const		{ ValidatePtr( _szComment ); return _szComment; }
 
 protected:
 	char* _szComment;

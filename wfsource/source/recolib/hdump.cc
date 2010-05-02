@@ -13,7 +13,7 @@ using namespace std;
 
 //============================================================================
 
-char
+static unsigned char
 charTable[256] =
 {
 	'.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.',
@@ -36,12 +36,11 @@ charTable[256] =
 
 //============================================================================
 
-
 ulong
-HDumpLine(char* buffer, ulong bufferSize,ostream& out)
+HDumpLine(unsigned char* buffer, ulong bufferSize,ostream& out)
 {
 	ulong i = bufferSize;
-	unsigned char* dataBuffer = (unsigned char *)buffer;
+	unsigned char* dataBuffer = buffer;
 	unsigned char ch;
 	unsigned int value;
 	uint count = 0;
@@ -58,7 +57,7 @@ HDumpLine(char* buffer, ulong bufferSize,ostream& out)
 	out << "    ";
 
 	i = bufferSize;
-	dataBuffer = (unsigned char *)buffer;
+	dataBuffer = buffer;
 	while(i--)					// now print ascii
 	 {
 		ch = *dataBuffer++;
@@ -72,7 +71,7 @@ HDumpLine(char* buffer, ulong bufferSize,ostream& out)
 //============================================================================
 
 void
-HDump(void* buffer, ulong bufferSize, int indent, char* indentString, ostream& out,unsigned int charsPerLine)
+HDump(void* buffer, ulong bufferSize, int indent, unsigned char* indentString, ostream& out,unsigned int charsPerLine)
 {
 	assert(ValidPtr(buffer));
 	assert(bufferSize > 0);
@@ -83,8 +82,8 @@ HDump(void* buffer, ulong bufferSize, int indent, char* indentString, ostream& o
 	ulong len;
 	ulong offset = 0;
 	int temp;
-	char* dataBuffer = (char*)buffer;
-	assert(buffer);
+	unsigned char* dataBuffer = (unsigned char*)buffer;
+	ValidatePtr(buffer);
 
 //	printf("buffersize %lu\n", bufferSize);
 	while(bufferSize)

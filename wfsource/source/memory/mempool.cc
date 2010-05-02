@@ -49,7 +49,7 @@ MemPool::MemPool(size_t size,int entries,Memory& memory MEMORY_NAMED( COMMA cons
 
 	_memory = &memory;
 	_buffer = new (memory) char[size*entries];
-	assert(_buffer);
+	ValidatePtr(_buffer);
 	AssertMemoryAllocation(_buffer);
 
 #if DO_ASSERTIONS
@@ -84,7 +84,7 @@ MemPool::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 	AssertMsg( _currentEntries < _maxEntries,"_currentEntries=" << _currentEntries << " _maxEntries=" << _maxEntries );
 
 #if MEMPOOL_REALTRACKING
-	assert(_firstFree._next);
+	ValidatePtr(_firstFree._next);
 	if(_firstFree._next)
 	 {
 //#if DO_ASSERTIONS
@@ -103,7 +103,7 @@ MemPool::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 //#endif
 #error !!!
 	void* mem = malloc(_size);
-	assert(mem);
+	ValidatePtr(mem);
 	AssertMemoryAllocation(mem);
 	DBSTREAM5(cprogress << "Allocating an entry from Memory Pool " << this << " at address " << mem << " for a total of " <<  _currentEntries << " entries\n");
 	return(mem);
@@ -117,7 +117,7 @@ void
 MemPool::Free(const void* mem)
 {
 	Validate();
-	assert(ValidPtr(mem));
+	ValidatePtr(mem);
 //#if DO_ASSERTIONS
 	_currentEntries--;
 //#endif
@@ -175,20 +175,20 @@ CPPMemPoolTest(void)
 #define MEMPOOL_SIZE 24
 #define MEMPOOL_ENTRIES 10
 	MemPool* testMemPool = new MemPool(MEMPOOL_SIZE,MEMPOOL_ENTRIES,HALLmalloc MEMORY_NAMED(COMMA "Test MemPool"));
-	assert(testMemPool);
+	ValidatePtr(testMemPool);
 	testMemPool->Validate();
 
 	void* test1 = testMemPool->Allocate(MEMPOOL_SIZE ASSERTIONS( COMMA __FILE__ COMMA __LINE__ ));
-	assert(ValidPtr(test1));
+	ValidatePtr(test1);
 	testMemPool->Validate();
 	assert(testMemPool->Entries() == 1);
 	void* test2 = testMemPool->Allocate(MEMPOOL_SIZE  ASSERTIONS( COMMA __FILE__ COMMA __LINE__ ));
-	assert(ValidPtr(test2));
+	ValidatePtr(test2);
 	assert(test2 != test1);
 	testMemPool->Validate();
 	assert(testMemPool->Entries() == 2);
 	void* test3 = testMemPool->Allocate(MEMPOOL_SIZE  ASSERTIONS( COMMA __FILE__ COMMA __LINE__ ));
-	assert(ValidPtr(test3));
+	ValidatePtr(test3);
 	assert(test1 != test3);
 	assert(test2 != test3);
 	testMemPool->Validate();
@@ -197,7 +197,7 @@ CPPMemPoolTest(void)
 	testMemPool->Free(test2);
 	assert(testMemPool->Entries() == 2);
 	void* test4 = testMemPool->Allocate(MEMPOOL_SIZE  ASSERTIONS( COMMA __FILE__ COMMA __LINE__ ));
-	assert(ValidPtr(test4));
+	ValidatePtr(test4);
 	assert(testMemPool->Entries() == 3);
 	assert(test4 == test2);					// rely on implementation to insure no leakage
 

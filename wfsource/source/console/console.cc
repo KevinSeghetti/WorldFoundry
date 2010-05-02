@@ -9,7 +9,7 @@
 Console::Console()
 {
 	_pTextBuffer = new TextBuffer( 40, 25 );
-	assert( _pTextBuffer );
+	ValidatePtr( _pTextBuffer );
 
 	clear();
 	home();
@@ -20,7 +20,7 @@ Console::Console()
 
 Console::~Console()
 {
-	assert( _pTextBuffer );
+	ValidatePtr( _pTextBuffer );
 	delete _pTextBuffer;
 }
 
@@ -41,7 +41,7 @@ Console::clear()
 void
 Console::print( const char* buf, ... )
 {
-	assert( buf );
+	ValidatePtr( buf );
 
 	static char buffer[ 1024 ];
 	va_list arglist;
