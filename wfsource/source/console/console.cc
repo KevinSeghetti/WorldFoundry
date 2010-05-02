@@ -59,14 +59,14 @@ Console::print( const char* buf, ... )
 		if ( pMsgLinefeed )
 		{	// Has a \n at end
 			int nChars = pMsgLinefeed - pMsg;
-			_pTextBuffer->print( _x, _y, pMsg, nChars );
+			_pTextBuffer->print( _x, _y, (const unsigned char*)pMsg, nChars );
 			pMsg += nChars + 1;		// + 1 for '\n'
 			_x = 0;
 			++_y;
 		}
 		else
 		{
-			_pTextBuffer->print( _x, _y, pMsg, strlen( pMsg ) );
+			_pTextBuffer->print( _x, _y, (const unsigned char*)pMsg, strlen( pMsg ) );
 			_x += strlen( pMsg );
 			pMsg = (char*)pMsgEnd;
 		}
