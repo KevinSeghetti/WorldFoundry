@@ -8,7 +8,6 @@ CCCARGS += -DYY_NEVER_INTERACTIVE
 TEST_LIBS += $(MATH) $(STREAMS) $(CPPLIB) $(MEMORY) $(HAL)
 
 #INCLUDE += -I c:/tools/shared
-INCLUDE += -I .                 # for missing unistd.h
 
 ################################################################################
 
