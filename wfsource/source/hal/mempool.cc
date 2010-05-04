@@ -28,7 +28,7 @@ MemPoolConstruct(size_t size,int entries,Memory& memory)
 {
 	assert(size);
 	AssertMsg((size % 4) == 0,"MemPool size must be long-word alligned, size was " << size);								// must be long-word aligned
-	ValidatePtr(entries);
+	assert(entries);
 	assert(size >= sizeof(_MemPoolFreeEntry));				// make sure our free entry struct will fit
 
 	SMemPool* memPool;
