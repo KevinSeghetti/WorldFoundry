@@ -42,7 +42,6 @@ expr_tab.h : expr.y
 
 
 lexyy.cc : expr.l
-	flex -8 -Caf -p -t expr.l >lexyy.cc
-#         -8 -Caf -p -t expr.l >lexyy.cc
+	flex -B -8 -Caf -p -t expr.l >lexyy.cc
 	@perl -i~ -p -n fixlex.pl lexyy.cc
 	@-rm lexyy.c~ >/dev/null
