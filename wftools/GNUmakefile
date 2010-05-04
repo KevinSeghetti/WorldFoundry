@@ -42,7 +42,6 @@ DIR_LIST = \
         iffcomp \
         iff2lvl \
         textile \
-	attribedit
 
 #=============================================================================
 
@@ -50,7 +49,7 @@ make_lib = echo ================================================================
 # what the ...? this make_lib MUST be a mistake?
 
 .PHONY : ALL
-ALL :
+ALL : $(WF_DIR)/bin
 	cd eval		&& ${MAKE} ${MFLAGS}
 	cd iffdump	&& ${MAKE} ${MFLAGS}
 	cd oaddump	&& ${MAKE} ${MFLAGS}
@@ -59,7 +58,6 @@ ALL :
 	cd iffcomp	&& ${MAKE} ${MFLAGS}
 	cd textile	&& ${MAKE} ${MFLAGS}
 	cd iff2lvl	&& ${MAKE} ${MFLAGS}
-	cd attribedit	&& ${MAKE} ${MFLAGS}
 
 
 .PHONY : clean
@@ -71,22 +69,22 @@ clean :
 	cd lvldump	&& ${MAKE} ${MFLAGS} $@
 	cd iffcomp	&& ${MAKE} ${MFLAGS} $@
 	cd textile	&& ${MAKE} ${MFLAGS} $@
-	cd attribedit	&& ${MAKE} ${MFLAGS} $@
 
 .PHONY :  print
 print: 
 	echo $(DIR_LIST)
-	
 
-copybinaries: ALL
+$(WF_DIR)/bin :
+	mkdir $(WF_DIR)/bin
+
+copybinaries: $(WF_DIR)/bin ALL
 	cp iffcomp/iffcomp $(WF_DIR)/bin
 	cp iff2lvl/iff2lvl $(WF_DIR)/bin
 	cp prep/prep $(WF_DIR)/bin
 	cp iffdump/iffdump $(WF_DIR)/bin
 	cp lvldump/lvldump $(WF_DIR)/bin
 	cp textile/textile $(WF_DIR)/bin
-	cp attribedit/attribedit $(WF_DIR)/bin
-	
+
 #=============================================================================
 
 # not really usefull under linux
