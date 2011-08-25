@@ -6,6 +6,7 @@
 #define _STDSTRM_HP
 
 #include <pigsys/pigsys.hp>
+#include <cpplib/strmnull.hp>
 
 #if SW_DBSTREAM
 
