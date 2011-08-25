@@ -59,7 +59,7 @@ const unsigned int MAX_LINES = 24;
 const size_t MAX_BUFFER_SIZE = BYTES_PER_LINE * MAX_LINES;
 
 void
-HDump( unsigned char* title, void* buffer, size_t bufferSize, Console& console )
+HDump( const char* title, void* buffer, size_t bufferSize, Console& console )
 {
 	console.clear();
 	console.print( "%s: addr $%x\n", title, buffer );
