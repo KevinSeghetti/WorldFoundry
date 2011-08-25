@@ -85,9 +85,9 @@ private:
 		VRAMTransientWidth			= 256,
 		VRAMTransientHeight			= 256	
 #endif
-#pragma message ("KTS: write our own font system to get around this")
 //		VRAMTransientHeight			= Display::VRAMHeight
 	};
+#pragma message ("KTS: write our own font system to get around this")
 
 	void AllocateTextureSlots(Display& display);
 	PixelMap* AllocateTextureSlot(Display& display,
