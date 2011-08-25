@@ -51,7 +51,7 @@ void
 GeneralTest(void)
 {
 	char foo[] = "123456";
-	char bar[] = "000000";
+	char bar[] = "00000000000000";
 
 	// first test StringCopyCount()
 	assert(strlen(foo) == 6);				// ensure I got the test string length right
@@ -65,7 +65,7 @@ GeneralTest(void)
 
 	StringCopyCount(bar,foo,10);
 	assert(strlen(bar) == 6);
-	assert(!strcmp(foo,bar));
+	AssertMsg(!strcmp(foo,bar),"foo = "<< foo << ", bar = " << bar);
 }
 
 #endif
