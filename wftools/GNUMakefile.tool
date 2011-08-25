@@ -42,7 +42,8 @@ $(EVAL) = $(WF_DIR)/source/objdebugglsoftwarexss.linux/libeval.a
 $(REGEXP) = $(WF_DIR)/source/objdebugglsoftwarexss.linux/libregexp.a
 
 # kts these are needed by prep
-PIGS_LIBS += $(RECOLIB) $(EVAL) $(REGEXP) $(IFFWRITE)
+#PIGS_LIBS += $(RECOLIB) $(EVAL) $(REGEXP) $(IFFWRITE)
+PIGS_LIBS += $(RECOLIB) $(REGEXP) $(IFFWRITE)
 
 # kts these are needed by attribedit
 PIGS_LIBS += $(PIGS_LIB_DIR)libini.a
