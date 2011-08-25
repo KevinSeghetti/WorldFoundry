@@ -52,7 +52,7 @@ bool bFullScreen = true;
 
 /*static*/ void PIGSInitStartupTask();
 
-SAlloc* stacks;
+//SAlloc* stacks;
 
 //=============================================================================
 // this is the actual main, which may be pasted into user code if you wish to
@@ -250,9 +250,9 @@ _PlatformSpecificInit(int /*argc*/, char** /*argv*/, int /*maxTasks*/,int /*maxM
 void
 _PlatformSpecificUnInit(void)
 {
-	assert(stacks);
-	delete stacks;
-	stacks = NULL;
+	//assert(stacks);
+	//delete stacks;
+	//stacks = NULL;
 	MEMORY_DELETE((*_HALLmalloc),_HALDmalloc,DMalloc);
 	delete _HALLmalloc;
 	free(halMemory);
