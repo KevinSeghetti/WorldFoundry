@@ -9,7 +9,7 @@
 
 #if (defined(__WIN__) || defined(__LINUX__) ) && SW_DBSTREAM
 #include <cpplib/strmnull.hp>
-nullstream cppteststrm_null;				// Create a global instance of the output
+CREATENULLSTREAM(cppteststrm_null);				// Create a global instance of the output 
 CREATEANDASSIGNOSTREAM(cmem,cppteststrm_null);
 #endif
 
