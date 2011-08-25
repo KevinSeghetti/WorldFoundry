@@ -57,7 +57,11 @@ source::ParseExpression(const string& expression)
 
 	DBSTREAM2( cdebug << "ParseExpression: expression string = <" << expression << '>' << endl; )
 //	fprintf(stderr,"expression string = %s\n",expression.c_str());
+#ifdef SW_INCLUDE_EVAL
 	double retVal = ::eval( expression.c_str(), NULL );
+   #else
+	double retVal = 0;
+#endif
 //	fprintf(stderr,"\nafter\n");
 	fflush(stderr);
 	cout << flush;
