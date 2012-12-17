@@ -85,6 +85,7 @@ ifeq ($(WF_TARGET),linux)
 #	$(SYS_LIBS)
 
 ifeq ($(PROGRAM),prep)
+	mkdir -p $(WF_DIR)/bin
 	cp -f prep $(WF_DIR)/bin
 endif
 endif
