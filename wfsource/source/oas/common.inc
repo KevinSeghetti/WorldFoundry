@@ -17,8 +17,8 @@
 		TYPEENTRYOBJREFERENCE(Poof)
 		TYPEENTRYBOOLEAN(Is Needle Gun Target,Needle Gun Target,0)
 		TYPEENTRYINT32(Write To Mailbox On Death,Death Mailbox, 0, 3999, 0,,SHOW_AS_NUMBER,"Mailbox to write to when object is destroyed")
-@*		TYPEENTRYXDATA_CONVERT(Script,DEFAULT_SCRIPTNAME,"Cave Logic Studios AI [Script]||..\\scripts\\default.s",XDATA_NOT_REQUIRED,,,,,XDATA_SCRIPT)
-		TYPEENTRYXDATA_CONVERT(Script,DEFAULT_SCRIPTNAME,"Cave Logic Studios AI [Script]||what is this?..\\scripts\\default.s",XDATA_NOT_REQUIRED,,,,,XDATA_COPY)
+@*		TYPEENTRYXDATA_CONVERT(Script,DEFAULT_SCRIPTNAME,"Cave Logic Studios AI [Script]||../scripts/default.s",XDATA_NOT_REQUIRED,,,,,XDATA_SCRIPT)
+		TYPEENTRYXDATA_CONVERT(Script,DEFAULT_SCRIPTNAME,"Cave Logic Studios AI [Script]||what is this?../scripts/default.s",XDATA_NOT_REQUIRED,,,,,XDATA_COPY)
 		TYPEENTRYBOOLEAN(Script Controls Input,,0)
 		TYPEENTRYXDATA_NOTES
 
