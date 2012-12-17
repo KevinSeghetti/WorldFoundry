@@ -202,7 +202,12 @@ IffWriterText::out_file( const File& file )
 	if ( !ptr )
     {
         DBSTREAM1(cerror << "can't open file " << file.filename() << std::endl; )
+#if !defined( NDEBUG )
+        // optimizations turn exception handling off
 		throw;	//return false;
+#else
+        exit(5);
+#endif
     }
 	ValidatePtr( ptr );
 
@@ -229,7 +234,12 @@ IffWriterBinary::out_file( const File& file )
 	if ( !ptr )
     {
         DBSTREAM1( cerror << "can't open file " << file.filename() << std::endl; )
+#if !defined( NDEBUG )
+        // optimizations turn exception handling off
 		throw;	//return false;
+#else
+        exit(5);
+#endif
 
     }
 	ValidatePtr( ptr );
