@@ -17,8 +17,12 @@ TEST_LIBS += $(HAL) $(CPPLIB) $(MATH) $(MEMORY) $(STREAMS) $(GFX) $(ANIM) $(PHYS
 
 CCCARGS	+= -D__GAME__=\"WorldFoundryEngine\"
 
-SYS_LIBS += $(TCL_LIB)
-SYS_LIBS += $(PERL_LIB)
+ifdef TCL
+   SYS_LIBS += $(TCL_LIB)
+endif
+ifdef PERL
+   SYS_LIBS += $(PERL_LIB)
+endif
 SYS_LIBS += $(GL_LIB)
 ifeq ($(PHYSICS_ENGINE),ode)
 SYS_LIBS += $(ODE_LIB)

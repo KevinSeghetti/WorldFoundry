@@ -61,10 +61,15 @@ ScriptInterpreter::DeleteConstantArray(IntArrayEntry* /*entryList*/)
 
 ScriptInterpreter* ScriptInterpreterFactory(MailboxesManager& mailboxesManager, Memory& memory)
 {
+
+#if TCL
    // kts right now the factory always makes TCL interpreters, I need to decide how the designer will specify
    // which laungauge each script is in (I could either put it at the top line of the script, or have a seperate OAS field for it)
 
    return new (memory) TCLInterpreter(mailboxesManager);
+#else
+   #error No script interpreter defined
+#endif
 }
 
 //==============================================================================

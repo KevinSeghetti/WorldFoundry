@@ -24,9 +24,9 @@ LIB_OBJS += \
 	
 
 	
-#ifeq ($(TCL)),1)
+ifdef TCL
 	LIB_OBJS += $(LIB_OBJ_DIR)tcl$(OBJ) 
-#endif
+endif
 
 
 ################################################################################
