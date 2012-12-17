@@ -14,7 +14,7 @@ TYPEHEADER(Tool)
 
 	PROPERTY_SHEET_HEADER(Tool,1)
 @*	----------------------
-	TYPEENTRYXDATA_CONVERT(Activation Script,,"Cave Logic Studios AI [Script]||..\\scripts\\default.s",XDATA_NOT_REQUIRED,,,,,XDATA_SCRIPT)
+	TYPEENTRYXDATA_CONVERT(Activation Script,,"Cave Logic Studios AI [Script]||../scripts/default.s",XDATA_NOT_REQUIRED,,,,,XDATA_SCRIPT)
 
 	TYPEENTRYOBJREFERENCE(Object To Throw)
 	TYPEENTRYINT32(Activation Cost,,0, 100, 1, "", SHOW_AS_SLIDER)
