@@ -61,11 +61,13 @@ ALL : libstrm.inc
 #
 # Build prep from here so the user does not get the error, then have to
 # go build it, then come back here and make again.
+ifneq ($(BUILDMODE),release)
+# kts probably not the best way to do this, but for now don't want to try to build tools in release mode
 	$(MAKE) -C ../../wftools/prep/
 	cp ../../wftools/prep/prep ../bin
 	$(MAKE) -C ../../wftools/iffcomp/
 	cp ../../wftools/iffcomp/iffcomp ../bin
-	
+endif	
 	$(MAKE) -C gfx
 	$(MAKE) -C iff
 ifeq ($(BUILDMODE),tool)
