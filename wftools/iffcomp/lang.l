@@ -247,7 +247,7 @@ include[ \t]+<				{ BEGIN INCLUDE; }
 %%
 
 void
-yyerror( char* message )
+yyerror( const char* message )
 {
 	assert( theGrammar );
 	theGrammar->Error( message );

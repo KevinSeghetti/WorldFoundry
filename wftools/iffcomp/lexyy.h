@@ -1,6 +1,6 @@
 //lexyy.h
 
 
-extern void yyerror( char* message );
+extern void yyerror( const char* message );
 
 
