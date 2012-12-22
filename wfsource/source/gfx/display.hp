@@ -58,6 +58,9 @@ class PixelMap;
 
 #if defined(RENDERER_PIPELINE_GL)
 #define GFX_ZBUFFER
+#elif defined(RENDERER_PIPELINE_GLES)
+#define GFX_ZBUFFER
+
 #else
 //#define GFX_ZBUFFER
 #endif

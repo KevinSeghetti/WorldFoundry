@@ -46,6 +46,8 @@
 	#include <gfx/psx/rendobj3.cc>
 #elif defined ( RENDERER_PIPELINE_GL )
 	#include <gfx/glpipeline/rendobj3.cc>
+#elif defined ( RENDERER_PIPELINE_GLES )
+	#include <gfx/glespipeline/rendobj3.cc>
 #elif defined ( RENDERER_PIPELINE_DIRECTX )
 	#include <gfx/directxpipeline/rendobj3.cc>
 #else

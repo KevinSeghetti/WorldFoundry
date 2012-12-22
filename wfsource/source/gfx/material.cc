@@ -66,6 +66,8 @@ Material::Get3DRenderObjectPtr() const
 			#include <gfx/psx/renderer.ext>
 		#elif defined( RENDERER_PIPELINE_GL )
 			#include <gfx/glpipeline/renderer.ext>
+		#elif defined( RENDERER_PIPELINE_GLES )
+			#include <gfx/glespipeline/renderer.ext>
 		#elif defined( RENDERER_PIPELINE_DIRECTX )
 			#include <gfx/directxpipeline/renderer.ext>
 		#else
@@ -124,6 +126,10 @@ Material::Construct()
 		// kts this is so fogging will always be smooth
       _materialFlags |= GOURAUD_SHADED;
 #elif defined( RENDERER_PIPELINE_GL )
+   if(_materialFlags & GOURAUD_SHADED)
+      _materialFlags &= ~GOURAUD_SHADED;
+#elif defined( RENDERER_PIPELINE_GLES )
+   // kts duplicated from PIPELINE_GL, not sure if this is needed
    if(_materialFlags & GOURAUD_SHADED)
       _materialFlags &= ~GOURAUD_SHADED;
 #elif defined( RENDERER_PIPELINE_DIRECTX )

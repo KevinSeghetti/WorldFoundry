@@ -443,6 +443,55 @@ RenderCamera::RenderBegin()
    glFogf(GL_FOG_END,_fogFar.AsFloat());
    glFogf(GL_FOG_MODE,GL_LINEAR);
 
+#elif defined(RENDERER_PIPELINE_GLES)
+
+   GLfloat lightBlack[] = {
+       0.0, 0.0, 0.0, 1.0
+   };
+
+   GLfloat lightColor[4];
+
+   ConvertToGLColor(_ambientColor, lightColor);
+   glLightModelfv(GL_LIGHT_MODEL_AMBIENT,lightColor);
+
+#if MAX_LIGHTS > GL_MAX_LIGHTS
+#error This GL implemenation does not provide enough lights
+#endif
+
+//#if GL_LIGHT1 != (GL_LIGHT0+1) || GL_LIGHT2 != (GL_LIGHT1+1)
+//#error GL light assumption violated
+//#endif
+
+   glMatrixMode(GL_MODELVIEW);               // so that lights don't get rotated
+   LoadGLMatrixFromMatrix34(_invertedPosition);
+
+    for(int index=0;index < MAX_LIGHTS;index++)
+    {
+        GLfloat lightDirection[4];
+        lightDirection[3] = 0.0;
+        
+        // negate because we store the direction the light travels, where GL stores the lights position
+        lightDirection[0] = -_dirLightDirections[index].X().AsFloat();
+        lightDirection[1] = -_dirLightDirections[index].Y().AsFloat();
+        lightDirection[2] = -_dirLightDirections[index].Z().AsFloat();
+//        cout << "light direction[" << index << "]: " << _dirLightDirections[index] << endl;
+//        cout << "light color: " << _dirLightColors[index] << endl;
+        glLightfv(GLLightTable[index],GL_POSITION,lightDirection);
+        
+        ConvertToGLColor(_dirLightColors[index],lightColor);
+        
+        glLightfv(GLLightTable[index],GL_AMBIENT,lightBlack);
+        glLightfv(GLLightTable[index],GL_DIFFUSE,lightColor);
+        glLightfv(GLLightTable[index],GL_SPECULAR,lightBlack);
+        AssertGLOK();
+    }
+
+   ConvertToGLColor(_fogColor,lightColor);
+   glFogfv(GL_FOG_COLOR, lightColor); 
+   glFogf(GL_FOG_START,_fogNear.AsFloat());
+   glFogf(GL_FOG_END,_fogFar.AsFloat());
+   glFogf(GL_FOG_MODE,GL_LINEAR);
+
 #elif defined(RENDERER_PIPELINE_DIRECTX)
 
 	// Get D3D window pointer
@@ -578,6 +627,20 @@ RenderCamera::RenderObject(RenderObject3D& object,const Matrix34& objectPosition
 	object.Render(_viewPort,temp);
 #elif defined(RENDERER_PIPELINE_GL)
 //#error kts write code here
+	Matrix34 invertedObjectMatrix;
+	invertedObjectMatrix[3] = Vector3::zero;
+	invertedObjectMatrix.InverseDetOne(objectPosition);			// rotate lights into local coordinate space
+    //cout << "Object position: " << objectPosition << std::endl;
+    //cout << "invertedObjectMatrix = " << invertedObjectMatrix << std::endl;
+    invertedObjectMatrix[3] = Vector3::zero;
+
+	Matrix34 temp(objectPosition);
+	temp *= _invertedPosition;
+
+   //cout << "Final matrix: " << temp << endl;
+	object.Render(_viewPort,temp);
+
+#elif defined(RENDERER_PIPELINE_GLES)
 	Matrix34 invertedObjectMatrix;
 	invertedObjectMatrix[3] = Vector3::zero;
 	invertedObjectMatrix.InverseDetOne(objectPosition);			// rotate lights into local coordinate space

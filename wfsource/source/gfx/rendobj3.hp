@@ -76,6 +76,8 @@ private:
 #	include <gfx/psx/renderer.inc>
 #elif defined( RENDERER_PIPELINE_GL)
 #	include <gfx/glpipeline/renderer.inc>
+#elif defined( RENDERER_PIPELINE_GLES)
+#	include <gfx/glespipeline/renderer.inc>
 #elif defined( RENDERER_PIPELINE_DIRECTX)
 #	include <gfx/directxpipeline/renderer.inc>
 #else
@@ -131,6 +133,8 @@ struct RotatedVector
 #	include <gfx/psx/rendobj3.hp>
 #elif defined(RENDERER_PIPELINE_GL)
 #		include <gfx/glpipeline/rendobj3.hp>
+#elif defined(RENDERER_PIPELINE_GLES)
+#		include <gfx/glespipeline/rendobj3.hp>
 #elif defined(RENDERER_PIPELINE_DIRECTX)
 #		include <gfx/directxpipeline/rendobj3.hp>
 #else

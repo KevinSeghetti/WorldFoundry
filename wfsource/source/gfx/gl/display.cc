@@ -240,7 +240,7 @@ WFInitGL()
 
     glEnable(GL_BLEND);
     AssertGLOK();
-#if !defined( RENDERER_PIPELINE_GL )
+#if !defined( RENDERER_PIPELINE_GL ) && !defined( RENDERER_PIPELINE_GLES )
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     AssertGLOK();
 #endif
@@ -287,6 +287,10 @@ WFInitGL()
     
     AssertGLOK();
 #if defined( RENDERER_PIPELINE_GL )
+    //float fAspect = float(wfWindowWidth)/float(wfWindowHeight);
+    float fAspect = 1.0;                           // kts I am correcting for this elsewhere, eventually in the case of PIPELINE_GL this will need to be changed
+    gluPerspective(60.0f,fAspect,1.0,1000.0f);
+#elif defined( RENDERER_PIPELINE_GLES )
     //float fAspect = float(wfWindowWidth)/float(wfWindowHeight);
     float fAspect = 1.0;                           // kts I am correcting for this elsewhere, eventually in the case of PIPELINE_GL this will need to be changed
     gluPerspective(60.0f,fAspect,1.0,1000.0f);
@@ -460,6 +464,27 @@ Display::RenderBegin()
    glMaterialfv(GL_FRONT,GL_DIFFUSE,lightWhite);
    glMaterialfv(GL_FRONT,GL_SPECULAR,lightBlack);
    AssertGLOK();
+#elif defined(RENDERER_PIPELINE_GLES)
+   glEnable(GL_LIGHTING);
+   glEnable(GL_LIGHT0);
+   glEnable(GL_LIGHT1);
+   glEnable(GL_LIGHT2);
+   glEnable(GL_NORMALIZE);
+   glEnable(GL_FOG);
+
+   GLfloat lightWhite[] = {
+       1.0, 1.0, 1.0, 1.0
+   };
+
+
+   GLfloat lightBlack[] = {
+       0.0, 0.0, 0.0, 0.0
+   };
+   glMaterialfv(GL_FRONT,GL_AMBIENT,lightWhite);
+   glMaterialfv(GL_FRONT,GL_DIFFUSE,lightWhite);
+   glMaterialfv(GL_FRONT,GL_SPECULAR,lightBlack);
+   AssertGLOK();
+
 #else
    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
    glDisable(GL_LIGHTING);
@@ -681,6 +706,8 @@ Display::PageFlip()
 
 #endif // 0
 
+
+#elif defined(RENDERER_PIPELINE_GLES) 
 
 #else
 #error renderer pipeline not defined!

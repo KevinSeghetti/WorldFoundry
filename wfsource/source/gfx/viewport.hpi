@@ -124,6 +124,8 @@ ViewPort::Clear()
 	Validate();
 #if defined(RENDERER_PIPELINE_GL)
 	// do nothing
+#elif defined(RENDERER_PIPELINE_GLES)
+
 #elif defined(RENDERER_PIPELINE_SOFTWARE) || defined(RENDERER_PIPELINE_PSX)
 
 #if defined(USE_ORDER_TABLES)
