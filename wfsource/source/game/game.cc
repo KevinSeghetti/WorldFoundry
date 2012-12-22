@@ -337,6 +337,9 @@ WFGame::RunLevel(_DiskFile* levelFile)
 #endif
 		DBSTREAM2( cflow << "WFGame::update: done" << std::endl; )
 
+      // kts uncomment to get frame rate on the release (with debug printing on) version 
+		//std::cout << "deltaTime = " << deltaTime << ", frame rate = " << Scalar::one / deltaTime << std::endl;
+
 		assert(HALScratchLmalloc.Empty());		// make sure everyone remembered to free their scratch memory
 	}
 	_display->PageFlip();			    // insure no pending ordertable renderings
