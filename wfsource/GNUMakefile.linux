@@ -9,7 +9,23 @@ TCL_LIB= -ltcl
 
 PERL_LIB = `perl -MExtUtils::Embed -e ldopts`
 LUA_LIB = -llua -llualib -lm
+
+ifeq ($(RENDERER),egl)
+GL_LIB =  -lEGL
+endif
+
+ifeq ($(RENDERER_PIPELINE),gles)
+GL_LIB =  -lGLES
+endif
+
+ifeq ($(RENDERER_PIPELINE),gl)
 GL_LIB = -lGLU -lGL
+endif
+
+ifeq ($(RENDERER), gl)
+GL_LIB = -lGLU -lGL
+endif
+
 ODE_LIB = -lode 
 
 ## Linker
