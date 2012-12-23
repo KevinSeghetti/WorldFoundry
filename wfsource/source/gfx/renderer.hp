@@ -35,6 +35,14 @@
 #	endif
 #  include <GL/gl.h>
 #	include <gfx/gl/wfprim.h>
+#elif defined(RENDERER_EGL)
+//#  include <GL/gl.h>
+#	include <gfx/egl/wfprim.h>
+
+#define Display XDisplay
+#  include <EGL/egl.h>
+#undef Display 
+// kts remove these
 #elif defined(RENDERER_XWINDOWS)
 #  include <GL/gl.h>
 #	include <gfx/xwindows/wfprim.h>

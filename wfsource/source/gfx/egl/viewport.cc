@@ -1,6 +1,6 @@
 //=============================================================================
-// viewport.cc: viewport hardware abstraction class
-// Copyright ( c ) 1997,1998,1999,2000,2001 World Foundry Group  
+// gfx\psx\viewport.cc: viewport hardware abstraction class, psx specific cod3e
+// Copyright ( c ) 1997,1998,1999,2000 World Foundry Group  
 // Part of the World Foundry 3D video game engine/production environment
 // for more information about World Foundry, see www.worldfoundry.org
 //==============================================================================
@@ -24,39 +24,49 @@
 // Original Author: Kevin T. Seghetti
 //============================================================================
 
-#include <gfx/viewport.hp>
+#include <hal/hal.h>
 
-#if defined ( RENDERER_PSX )
-#include <gfx/psx/viewport.cc>
-#elif defined ( RENDERER_GL )
-#include <gfx/gl/viewport.cc>
-#elif defined ( RENDERER_EGL )
-#include <gfx/egl/viewport.cc>
-#elif defined ( RENDERER_XWINDOWS )
-#include <gfx/xwindows/viewport.cc>
-#elif defined ( RENDERER_DIRECTX )
-#include <gfx/directx/viewport.cc>
-#else
-#error no viewport code for this platform!
+//==============================================================================
+
+ViewPort::ViewPort(Display& display, int orderTableDepth, Scalar xSize, Scalar ySize, Memory& memory, int subdividePrimitivesCount) :
+	_display(display)
+	,_memory(memory)
+	,_xSize(xSize)
+	,_halfXSize( _xSize / 2 )
+	,_ySize(ySize)
+	,_halfYSize( _ySize / 2 )
+#if defined(USE_ORDER_TABLES)
+	,_primitives((LMalloc*)&__primitives)
 #endif
+{
+	_memory.Validate();
+#if defined(USE_ORDER_TABLES)
+	for(int index=0;index<ORDER_TABLES;index++)
+	{
+		new ((void*)&_primitives[index]) LMalloc(HALLmalloc,sizeof(Primitive)*subdividePrimitivesCount 	MEMORY_NAMED( COMMA "ViewPort Primitives" ) 	);
+		_primitives[index].Validate();
+	}
+
+	RangeCheck(0,orderTableDepth,10000);  // kts arbitrary
+	_orderTableDepth = orderTableDepth;
+
+	for(int otIndex=0;otIndex<ORDER_TABLES;otIndex++)
+	{
+		_orderTable[otIndex] = new (_memory) OrderTable(orderTableDepth,_memory);
+		assert(ValidPtr(_orderTable[otIndex]));
+	}
+#endif
+	Validate();
+}
 
 //============================================================================
 
-#if defined(USE_ORDER_TABLES)
-Primitive*
-ViewPort::DuplicatePrimitive(const Primitive& original, int count)
+ViewPort::~ViewPort()
 {
-
-	Primitive* prims = (Primitive*)_primitives[_display.GetConstructionOrderTableIndex()].Allocate(count*sizeof(Primitive) ASSERTIONS( COMMA __FILE__ COMMA __LINE__ ));
-	assert(ValidPtr(prims));
-	if(prims)
-		for (int index=0;index<count;index++ )
-		{
-			// kts note: this could cause a read from invalid memory
-			memcpy((void*)&prims[index],(void*)&original,sizeof(Primitive));
-		}
-	return(prims);
-}
+#if defined(USE_ORDER_TABLES)
+	for(int index=ORDER_TABLES-1;index>=0;index--)
+		MEMORY_DELETE(_memory,_orderTable[index],OrderTable);
 #endif
+}
 
 //============================================================================

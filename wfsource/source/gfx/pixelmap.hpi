@@ -43,7 +43,7 @@ PixelMap::Validate() const
 	RangeCheckInclusive(0,_xPos + _xSize,Display::VRAMWidth);
 	RangeCheckInclusive(0,_yPos + _ySize,Display::VRAMHeight);
 
-#if defined(RENDERER_GL)
+#if defined(RENDERER_GL) || defined(RENDERER_EGL)
     if(_pixelBuffer)
         ValidatePtr(_pixelBuffer);
 #endif
@@ -153,7 +153,7 @@ PixelMap::GetYPositionInVideoMemory() const		// only valid for video memory pixe
 
 //==============================================================================
 
-#if defined(RENDERER_GL)
+#if defined(RENDERER_GL) || defined(RENDERER_EGL)
 inline void
 PixelMap::SetGLTexture() const                 // make this pixelmap the current GL texture
 {

@@ -1,6 +1,6 @@
 //=============================================================================
-// display.cc: display hardware abstraction class
-// Copyright ( c ) 1997,1998,1999,2000,2001 World Foundry Group  
+// gfx/egl/rendobj3.cc: 3D renderable object, psx specific code
+// Copyright ( c ) 1997,1998,1999,2000 World Foundry Group  
 // Part of the World Foundry 3D video game engine/production environment
 // for more information about World Foundry, see www.worldfoundry.org
 //==============================================================================
@@ -19,34 +19,36 @@
 // or see www.fsf.org
 
 // ===========================================================================
-// Description: The Display class encapsulates data and behavior for a single
-//	 hardware screen
+// Description:
+//
 // Original Author: Kevin T. Seghetti
 //============================================================================
+// included from gfx/rendobj3
 
-#include <gfx/display.hp>
+#include <math/vector3.hp>
+#include <math/matrix34.hp>
+#include <gfx/math.hp>
 
-#if defined ( RENDERER_PSX )
-#include <gfx/psx/display.cc>
+//============================================================================
+// kts maybe I should write an SVECTOR class
 
-#elif defined ( RENDERER_GL)
-#include <gfx/gl/display.cc>
-#pragma comment( lib, "opengl32.lib" )
+INLINE void
+ConvertVectorToVector3_PS(const Vector3& source,Vector3_PS& dest)
+{
+	dest = source;
+}
 
-#elif defined ( RENDERER_EGL)
-#include <gfx/egl/display.cc>
+//=============================================================================
 
-#elif defined ( RENDERER_XWINDOWS)
-#include <gfx/xwindows/display.cc>
+RendererVariables globalRendererVariables;
+//Matrix34 globalGTEMatrix;
+//const TriFace* currentRenderFace;
+//const Material* currentRenderMaterial;
 
-#elif defined ( RENDERER_DIRECTX)
-#include <gfx/directx/display.cc>
-#pragma comment( lib, "ddraw.lib" )
-#pragma comment( lib, "dxguid.lib" )
-
-#else
-#error no platform specific display code!
-
-#endif
+void
+RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
+{
+#pragma message ("KTS " __FILE__ ": added gl render code")
+}
 
 //============================================================================

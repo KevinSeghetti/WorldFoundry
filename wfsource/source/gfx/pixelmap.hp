@@ -41,6 +41,11 @@
 // 0 = 32 bit, seperated RGB, 1 = packed 5 bits per pixel
 #endif
             
+#if defined(RENDERER_EGL)
+#define SIXTEEN_BIT_VRAM 0
+// 0 = 32 bit, seperated RGB, 1 = packed 5 bits per pixel
+#endif
+
 //============================================================================
 
 class PixelMap
@@ -71,6 +76,10 @@ public:
     void SetGLTexture() const;                 // make this pixelmap the current GL texture
 #endif          // RENDERER_GL
 
+#if defined(RENDERER_EGL)
+    void SetGLTexture() const;                 // make this pixelmap the current GL texture
+#endif          // RENDERER_EGL
+
 #if defined(RENDERER_XWINDOWS)
     void SetGLTexture() const;                 // make this pixelmap the current GL texture
 #endif          // RENDERER_XWINDOWS
@@ -97,6 +106,16 @@ private:
     PixelMap* _parent;
 
 #if defined(RENDERER_GL)
+    GLuint _glTextureName;              // index of this pixelmaps texture
+
+#if SIXTEEN_BIT_VRAM
+     uint16* _pixelBuffer;
+#else
+    GLubyte* _pixelBuffer;
+#endif		                            // sixteen_bit
+#endif          // RENDERER_GL
+
+#if defined(RENDERER_EGL)
     GLuint _glTextureName;              // index of this pixelmaps texture
 
 #if SIXTEEN_BIT_VRAM

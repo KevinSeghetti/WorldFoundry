@@ -36,7 +36,6 @@
 #include <gfx/prim.hp>
 #include <gfx/otable.hp>
 #include <gfx/display.hp>
-#include <gfx/prim.hp>
 #include <memory/memory.hp>
 #include <memory/lmalloc.hp>
 

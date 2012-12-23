@@ -1,6 +1,6 @@
 //=============================================================================
-// display.cc: display hardware abstraction class
-// Copyright ( c ) 1997,1998,1999,2000,2001 World Foundry Group  
+// gl/RenderObject3D.hp: 3D renderable object
+// Copyright ( c ) 1997,1998,1999,2000 World Foundry Group  
 // Part of the World Foundry 3D video game engine/production environment
 // for more information about World Foundry, see www.worldfoundry.org
 //==============================================================================
@@ -19,34 +19,30 @@
 // or see www.fsf.org
 
 // ===========================================================================
-// Description: The Display class encapsulates data and behavior for a single
-//	 hardware screen
+// Description: software renderer specific data structures, etc.
 // Original Author: Kevin T. Seghetti
 //============================================================================
 
-#include <gfx/display.hp>
+#ifndef _SoftwareRenderObject3D_H
+#define _SoftwareRenderObject3D_H
 
-#if defined ( RENDERER_PSX )
-#include <gfx/psx/display.cc>
+//=============================================================================
 
-#elif defined ( RENDERER_GL)
-#include <gfx/gl/display.cc>
-#pragma comment( lib, "opengl32.lib" )
+struct RendererVariables
+{
+	ViewPort* viewPort;
+	long flags;
+	long zflag;
+	long sz[3];
+	long ir0[3];
+	const TriFace* currentRenderFace;
+	const Material* currentRenderMaterial;
+	const RotatedVector* rotatedVectorList;
+	const Vertex3D* vertexList;
+	Vector3_PS gteVect[3];
+	Matrix34 GTEMatrix;
+};
 
-#elif defined ( RENDERER_EGL)
-#include <gfx/egl/display.cc>
-
-#elif defined ( RENDERER_XWINDOWS)
-#include <gfx/xwindows/display.cc>
-
-#elif defined ( RENDERER_DIRECTX)
-#include <gfx/directx/display.cc>
-#pragma comment( lib, "ddraw.lib" )
-#pragma comment( lib, "dxguid.lib" )
-
-#else
-#error no platform specific display code!
-
+//=============================================================================
 #endif
-
-//============================================================================
+//=============================================================================

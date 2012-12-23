@@ -64,6 +64,20 @@ PixelMap::PixelMap(int flags, int xSize, int ySize)
    AssertGLOK();
 #endif
 
+#if defined(RENDERER_EGL) 
+#if SIXTEEN_BIT_VRAM
+     _pixelBuffer = new uint16[xSize*ySize];
+#else
+    _pixelBuffer = new GLubyte[xSize*ySize*4];
+#endif		                            // sixteen_bit
+    ValidatePtr(_pixelBuffer);
+
+   AssertGLOK();
+    glGenTextures(1,&_glTextureName);
+    assert(_glTextureName);
+   AssertGLOK();
+#endif
+
 
 #if defined(RENDERER_XWINDOWS) 
 #if SIXTEEN_BIT_VRAM
@@ -109,6 +123,10 @@ PixelMap::PixelMap(PixelMap& parent,int xPos, int yPos, int xSize, int ySize)
 #if defined(RENDERER_GL)
     _pixelBuffer = NULL;
 #endif
+#if defined(RENDERER_EGL)
+    _pixelBuffer = NULL;
+#endif
+
 	Validate();
     std::cout << "PixelMap::PixelMap: subpixelmap = " << this << std::endl;
 }
@@ -123,6 +141,12 @@ PixelMap::~PixelMap()
         delete [] _pixelBuffer;
     glDeleteTextures(1,(GLuint*)&_glTextureName);
 #endif
+#if defined(RENDERER_EGL)
+    if(_pixelBuffer)
+        delete [] _pixelBuffer;
+    glDeleteTextures(1,(GLuint*)&_glTextureName);
+#endif
+
 #if defined(RENDERER_XWINDOWS)
 #endif
 }
@@ -340,6 +364,113 @@ PixelMap::Load(const void* memory, int xOffset, int yOffset, int xSize, int ySiz
 
         AssertGLOK();
     }
+
+#elif defined(RENDERER_EGL)
+
+    psxRECT rect;
+    rect.x = _xPos+xOffset;
+    rect.y = _yPos+yOffset;
+    rect.w = xSize;
+    rect.h = ySize;
+
+    long unsigned int * _p = (long unsigned int *)memory;
+    ValidatePtr(_pixelBuffer);
+    GLubyte* pPB = _pixelBuffer;
+
+//	std::cout << "loading image into vram:" << rect.x << "," << rect.y << ";" << rect.w << "," << rect.h << std::endl;
+	assert(ValidPtr(_p));
+
+	uint16* pixels = (uint16*)_p;
+
+	int x2 = rect.x + rect.w;
+	int y2 = rect.y + rect.h;
+
+	assert(rect.x >= 0);
+	assert(x2 <= GetXSize());
+	assert(rect.y >= 0);
+	assert(y2 <= GetYSize());
+
+	for ( int y=rect.y; y<y2; ++y )
+	{
+		for ( int x=rect.x; x<x2; ++x )
+		{
+            assert(pPB);
+            GLubyte* destPixel = pPB + ((y*_xSize) + x)*4;            // 4 bytes per pixel: R, G, B, A
+#if SIXTEEN_BIT_VRAM
+			*destPixel = *pixels;
+#else
+            assert(destPixel);
+			destPixel[0] = ((*pixels >> 10) & 0x1f) << 3;
+			destPixel[1] = ((*pixels >> 5) & 0x1f) << 3;
+			destPixel[2] = (*pixels & 0x1f) << 3;
+			if(*pixels == 0x8000)
+				destPixel[3] = 255;	// be black
+			else if(*pixels == 0)
+				destPixel[3] = 0;  	// be transparent
+			else if(*pixels & 0x8000)
+				destPixel[3] = 128;  	// be semi-transparent
+			else
+				destPixel[3] = 255;	// be solid
+#endif // SIXTEEN_BIT_VRAM
+			pixels++;
+		}
+	}
+
+    if(_flags == MEMORY_VIDEO)
+    {
+        AssertGLOK();
+
+        assert(_glTextureName);
+        glBindTexture(GL_TEXTURE_2D,_glTextureName);
+
+#if SIXTEEN_BIT_VRAM
+#define TEXTURE_INTERNAL_FORMAT GL_RGB5
+#define TEXTURE_FORMAT GL_RGB
+#else
+#define TEXTURE_INTERNAL_FORMAT GL_RGBA
+#define TEXTURE_FORMAT GL_RGBA
+#endif
+
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        AssertGLOK();
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        AssertGLOK();
+#if defined ( GFX_ZBUFFER )
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        AssertGLOK();
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        AssertGLOK();
+        glEnable(GL_DEPTH_TEST);
+        AssertGLOK();
+        glEnable(GL_BLEND);
+        AssertGLOK();
+#else /* GFX_ZBUFFER */
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        AssertGLOK();
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        AssertGLOK();
+#endif /* GFX_ZBUFFER */
+
+          glTexImage2D(GL_TEXTURE_2D, 0, TEXTURE_INTERNAL_FORMAT, _xSize, _ySize,
+                  0, TEXTURE_FORMAT, GL_UNSIGNED_BYTE, pPB);
+        AssertGLOK();
+//        // kts temp code
+//          char* foo = new char[_xSize*_ySize*4];
+//          assert(foo);
+//          for(int index = 0; index < (_xSize*_ySize*4);index++)
+//              foo[index] = 0x0;
+
+//             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _xSize, _ySize,
+//                     0, GL_RGBA, GL_UNSIGNED_BYTE, foo);
+//   AssertGLOK();
+
+//             delete [] foo;
+
+
+        AssertGLOK();
+    }
+
 
 #elif defined(RENDERER_XWINDOWS)
 

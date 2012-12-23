@@ -70,8 +70,23 @@ class PixelMap;
 void LoadGLMatrixFromMatrix34(const Matrix34& matrix);
 #endif
 
+#if defined(RENDERER_EGL)
+// kts temp
+void LoadGLMatrixFromMatrix34(const Matrix34& matrix);
+#endif
+
 #if defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)
 #if defined(RENDERER_GL)
+#   include <GL/gl.h>
+const int VRAM_WIDTH = 1024;
+const int VRAM_HEIGHT = 512;
+const float VRAM_WIDTHF = float( VRAM_WIDTH );
+const float VRAM_HEIGHTF = float( VRAM_HEIGHT );
+
+
+#endif          // RENDERER_GL
+
+#if defined(RENDERER_EGL)
 #   include <GL/gl.h>
 const int VRAM_WIDTH = 1024;
 const int VRAM_HEIGHT = 512;
