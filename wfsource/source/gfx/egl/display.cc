@@ -1,4 +1,4 @@
-//=============================================================================
+//==============================================================================
 // gfx/egl/display.cc: display hardware abstraction class, windows openGL specific code
 // Copyright ( c ) 1997,1998,1999,2000,2001,2002 World Foundry Group  
 // Part of the World Foundry 3D video game engine/production environment
@@ -25,9 +25,9 @@
 //============================================================================
 
 #include <hal/hal.h>
-#include <GL/gl.h>
+//#include <GL/gl.h>
 
-#include <gfx/egl/wfprim.h>
+//#include <gfx/egl/wfprim.h>
 
 #include <memory/memory.hp>
 #include <gfx/pixelmap.hp>
@@ -57,257 +57,14 @@ int wfWindowHeight = 480;
 #include "wgl.cc"
 #endif
 #if defined(__LINUX__)
-#include "mesa.cc" 
+//#include "mesa.cc" 
+#include "egl.cc" 
 #include <sys/time.h>
 #include <unistd.h>
 #endif
 
-//==============================================================================
+extern void XEventLoop();
 
-#if 0
-#include <GL/glut.h>
-
-void
-TestGL2(void)
-{
-   glDisable( GL_TEXTURE_2D );
-   GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-   GLfloat mat_shininess[] = { 50.0 };
-   GLfloat light_position[] = { 1.0,1.0,1.0,1.0 };
-   GLfloat white_light[] = { 1.0,1.0,1.0,1.0 };
-   GLfloat black_light[] = { 0.0,0.0,0.0,1.0 };
-   GLfloat mat_ambient_color[] = { 0.8,0.8,0.2,1.0 };
-   GLfloat mat_diffuse[] = { 0.1,0.5, 0.8, 1.0 };
-   glClearColor(0.0,0.0,0.0,0.0);
-   glShadeModel(GL_SMOOTH);
-   glMaterialfv(GL_FRONT, GL_AMBIENT, mat_diffuse);
-   glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
-   glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-   glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-   glLightModelfv(GL_LIGHT_MODEL_AMBIENT,white_light);
-   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-   glLightfv(GL_LIGHT0, GL_AMBIENT, white_light);
-   glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
-   glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
-   glEnable(GL_LIGHTING);
-   glDisable(GL_LIGHT0);
-   glDisable(GL_LIGHT1);
-   glDisable(GL_LIGHT2);
-   glDisable(GL_LIGHT3);
-   glDisable(GL_LIGHT4);
-   glDisable(GL_LIGHT5);
-   glDisable(GL_LIGHT6);
-   glDisable(GL_LIGHT7);
-   glEnable(GL_DEPTH_TEST);
-   int w = 320;
-   int h = 200;
-   glViewport(0, 0, (GLsizei) w, (GLsizei)h);
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-   if(w<=h)
-      glOrtho(-1.5,1.5,-1.5*(GLfloat)h/(GLfloat)w,1.5*(GLfloat)h/(GLfloat)w, -10.0, 10.0);
-   else
-      glOrtho(-1.5*(GLfloat)w/(GLfloat)h,1.5*(GLfloat)w/(GLfloat)h, -1.5, 1.5, -10.0, 10.0);
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
-
-   while(1)
-   {
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      glutSolidSphere(1.0,20,16);
-
-      float zOffset = 15.0;
-   #if 1
-      glBegin(GL_TRIANGLES);
-      glVertex3f( 0.9, -0.9, -10.0 + zOffset);
-      glVertex3f( 0.9,  0.9, -10.0 + zOffset);
-      glVertex3f(-0.9,  0.0, -10.0 + zOffset);
-      glVertex3f(-0.9, -0.9, -20.0 + zOffset);
-      glVertex3f(-0.9,  0.9, -20.0 + zOffset);
-      glVertex3f( 0.9,  0.0, -5.0 + zOffset);
-      glEnd();
-   #endif
-      glFlush();
-
-      glXSwapBuffers(halDisplay.mainDisplay, halDisplay.win);
-      AssertGLOK();
-   }
-}
-
-
-void
-display(void)
-{
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-   glColor3f(0.0, 1.0, 0.0);
-   glutSolidSphere(1.0,20,16);
-
-   float zOffset = 15.0;
-#if 1
-   glBegin(GL_TRIANGLES);
-   glColor3f(1.0, 1.0, 1.0);
-   glVertex3f( 0.9, -0.9, -10.0 + zOffset);
-   glVertex3f( 0.9,  0.9, -10.0 + zOffset);
-   glVertex3f(-0.9,  0.0, -10.0 + zOffset);
-   glColor3f(0.0, 1.0, 0.0);
-   glVertex3f(-0.9, -0.9, -20.0 + zOffset);
-   glVertex3f(-0.9,  0.9, -20.0 + zOffset);
-   glVertex3f( 0.9,  0.0, -5.0 + zOffset);
-   glEnd();
-#endif
-   glFlush();
-}
-
-//==============================================================================
-
-void
-reshape(int w, int h)
-{
-   glViewport(0, 0, (GLsizei) w, (GLsizei)h);
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-   if(w<=h)
-      glOrtho(-1.5,1.5,-1.5*(GLfloat)h/(GLfloat)w,1.5*(GLfloat)h/(GLfloat)w, -10.0, 10.0);
-   else
-      glOrtho(-1.5*(GLfloat)w/(GLfloat)h,1.5*(GLfloat)w/(GLfloat)h, -1.5, 1.5, -10.0, 10.0);
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
-}
-
-//==============================================================================
-
-void
-TestGL(void)
-{
-
-   int argc=1;
-   char* argv[] = {"program"};
-   glutInit(&argc, argv);
-   glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
-   glutInitWindowSize(500,500);
-   glutInitWindowPosition(100,100);
-   glutCreateWindow("testGL");
-   GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-   GLfloat mat_shininess[] = { 50.0 };
-   GLfloat light_position[] = { 1.0,1.0,1.0,1.0 };
-   GLfloat white_light[] = { 1.0,1.0,1.0,1.0 };
-   GLfloat mat_ambient_color[] = { 0.8,0.8,0.2,1.0 };
-   GLfloat mat_diffuse[] = { 0.1,0.5, 0.8, 1.0 };
-   glClearColor(0.0,0.0,0.0,0.0);
-   glShadeModel(GL_SMOOTH);
-   glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
-   glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-   glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-   glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
-   glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
-   glEnable(GL_LIGHTING);
-   glEnable(GL_LIGHT0);
-   glEnable(GL_DEPTH_TEST);
-   glutDisplayFunc(display);
-   glutReshapeFunc(reshape);
-   glutMainLoop();
-}
-#endif
-
-//==============================================================================
-
-void
-WFInitGL()
-{
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	AssertGLOK();
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	AssertGLOK();
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	AssertGLOK();
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	AssertGLOK();
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	AssertGLOK();
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    //glShadeModel( GL_FLAT );
-    glShadeModel( GL_SMOOTH ); 
-    AssertGLOK();
-    glClearColor( 0.5, 0.5, 0.5, 1.0 );
-    AssertGLOK();
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    AssertGLOK();
-
-    glEnable(GL_BLEND);
-    AssertGLOK();
-#if !defined( RENDERER_PIPELINE_GL ) && !defined( RENDERER_PIPELINE_GLES )
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    AssertGLOK();
-#endif
-
-    glClearColor( 0.0, 0.0, 0.0, 0.0 );
-    AssertGLOK();
-//    glClearIndex( Black );
-
-    glMatrixMode( GL_MODELVIEW );
-    AssertGLOK();
-    glLoadIdentity();
-    AssertGLOK();
-
-    //glCullFace( GL_BACK );
-    //glEnable( GL_CULL_FACE );
-
-    // Prevent a divide by zero, when window is too short
-    // (you cant make a window of zero width).
-    //if(h == 0)
-    //	h = 1;
-
-    // Set the viewport to be the entire window
-    glViewport(0, 0, wfWindowWidth, wfWindowHeight);
-    AssertGLOK();
-
-    // Keep the square square, this time, save calculated
-    // width and height for later use
-//     if (w <= h)
-//     {
-//         windowHeight = 250.0f*h/w;
-//         windowWidth = 250.0f;
-//     }
-//     else
-//     {
-//         windowWidth = 250.0f*w/h;
-//         windowHeight = 250.0f;
-//     }
-    // Set the clipping volume
-
-    
-    glMatrixMode( GL_PROJECTION );
-    AssertGLOK();
-    glLoadIdentity();
-    
-    AssertGLOK();
-#if defined( RENDERER_PIPELINE_GL )
-    //float fAspect = float(wfWindowWidth)/float(wfWindowHeight);
-    float fAspect = 1.0;                           // kts I am correcting for this elsewhere, eventually in the case of PIPELINE_GL this will need to be changed
-    gluPerspective(60.0f,fAspect,1.0,1000.0f);
-#elif defined( RENDERER_PIPELINE_GLES )
-    //float fAspect = float(wfWindowWidth)/float(wfWindowHeight);
-    float fAspect = 1.0;                           // kts I am correcting for this elsewhere, eventually in the case of PIPELINE_GL this will need to be changed
-    gluPerspective(60.0f,fAspect,1.0,1000.0f);
-#else
-#if defined ( GFX_ZBUFFER )
-    glOrtho(-1.0, 1.0, -1.0, 1.0, -0.5f, 1000.0f);
-#else /* GFX_ZBUFFER */
-    glOrtho(-320.0f/2, 320/2, -320.0f/2, 320/2, 1.0f, -1.0f); 
-#endif /* GFX_ZBUFFER */
-#endif
-    AssertGLOK();
-
-    glMatrixMode( GL_MODELVIEW );
-    AssertGLOK();
-
-}
 //==============================================================================
 
 Display::Display(int orderTableSize, int xPos, int yPos, int xSize, int ySize, Memory& memory,bool /*interlace*/) :
@@ -329,18 +86,23 @@ _memory(memory)
         printf("Display::Display:doInit Failed!\n");
         sys_exit(1);
     }
-    AssertGLOK();
 
-	WFInitGL();
+//  while (1) {
+//      event_loop(halDisplay.mainDisplay, halDisplay.win, halDisplay.eglDisplay, halDisplay.eglSurface);
+//  }
 
-    assert(orderTableSize > 0);
-#if defined(USE_ORDER_TABLES)
-    for(int index=0;index<ORDER_TABLES;index++)
-    {
-        _orderTable[index] = new (_memory) OrderTable(orderTableSize,_memory);
-        assert(ValidPtr(_orderTable[index]));
-    }
-#endif
+//    AssertGLOK();
+//
+//   WFInitGL();
+//
+//    assert(orderTableSize > 0);
+//#if defined(USE_ORDER_TABLES)
+//    for(int index=0;index<ORDER_TABLES;index++)
+//    {
+//        _orderTable[index] = new (_memory) OrderTable(orderTableSize,_memory);
+//        assert(ValidPtr(_orderTable[index]));
+//    }
+//#endif
 
     // set up GL 
    //glLightModelf(GL_LIGHT_MODEL_TWO_SIDE,1);
@@ -397,6 +159,8 @@ Display::~Display()
 
 // do nothing
 #endif
+
+    DestroyWindow();
 }
 
 //============================================================================
@@ -466,25 +230,25 @@ Display::RenderBegin()
    glMaterialfv(GL_FRONT,GL_SPECULAR,lightBlack);
    AssertGLOK();
 #elif defined(RENDERER_PIPELINE_GLES)
-   glEnable(GL_LIGHTING);
-   glEnable(GL_LIGHT0);
-   glEnable(GL_LIGHT1);
-   glEnable(GL_LIGHT2);
-   glEnable(GL_NORMALIZE);
-   glEnable(GL_FOG);
-
-   GLfloat lightWhite[] = {
-       1.0, 1.0, 1.0, 1.0
-   };
-
-
-   GLfloat lightBlack[] = {
-       0.0, 0.0, 0.0, 0.0
-   };
-   glMaterialfv(GL_FRONT,GL_AMBIENT,lightWhite);
-   glMaterialfv(GL_FRONT,GL_DIFFUSE,lightWhite);
-   glMaterialfv(GL_FRONT,GL_SPECULAR,lightBlack);
-   AssertGLOK();
+// glEnable(GL_LIGHTING);
+// glEnable(GL_LIGHT0);
+// glEnable(GL_LIGHT1);
+// glEnable(GL_LIGHT2);
+// glEnable(GL_NORMALIZE);
+// glEnable(GL_FOG);
+//
+// GLfloat lightWhite[] = {
+//     1.0, 1.0, 1.0, 1.0
+// };
+//
+//
+// GLfloat lightBlack[] = {
+//     0.0, 0.0, 0.0, 0.0
+// };
+// glMaterialfv(GL_FRONT,GL_AMBIENT,lightWhite);
+// glMaterialfv(GL_FRONT,GL_DIFFUSE,lightWhite);
+// glMaterialfv(GL_FRONT,GL_SPECULAR,lightBlack);
+// AssertGLOK();
 
 #else
    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -538,7 +302,7 @@ Display::RenderBegin()
     glVertex3f( 0.9,  0.0, -5.0 + zOffset);
     glEnd();
 #endif
-    glLoadIdentity ();
+    //glLoadIdentity ();
 }
 
 //==============================================================================
@@ -552,31 +316,9 @@ Display::RenderEnd()
 
 extern bool	windowActive;		// Window windowActive Flag Set To TRUE By Default
 
-
 Scalar
 Display::PageFlip()
 {
-#if 0
-
-    // event_loop( dpy );
-    XEvent event;
-
-    while(XCheckMaskEvent(dpy, 0xffffffff,&event))
-    {
-   //while (1) {
-      //XNextEvent( dpy, &event );
-
-        switch(event.type)
-        {
-            case Expose:
-                redraw( dpy, event.xany.window );
-                break;
-            case ConfigureNotify:
-                resize( event.xconfigure.width, event.xconfigure.height );
-                break;
-        }
-    }
-#endif
 
 #if defined(__WIN__)
 	MSG		msg;									// Windows Message Structure
@@ -707,9 +449,9 @@ Display::PageFlip()
 
 #endif // 0
 
-
 #elif defined(RENDERER_PIPELINE_GLES) 
-
+    draw();
+    eglSwapBuffers(halDisplay.eglDisplay, halDisplay.eglSurface);
 #else
 #error renderer pipeline not defined!
 #endif
@@ -721,7 +463,7 @@ Display::PageFlip()
     // Call function to swap the buffers
 	SwapBuffers(hDC);					// Swap Buffers (Double Buffering)
 #elif defined(__LINUX__)
-    glXSwapBuffers(halDisplay.mainDisplay, halDisplay.win);
+    //glXSwapBuffers(halDisplay.mainDisplay, halDisplay.win);
     AssertGLOK();
 
          // glFinish();
@@ -1080,7 +822,271 @@ LoadGLMatrixFromMatrix34(const Matrix34& matrix)
     mat[(3*4)+2] = matrix[3][2].AsFloat();
     mat[(3*4)+3] = 1.0;
 
-    glLoadMatrixf(mat);
+    //glLoadMatrixf(mat);
+}
+
+//==============================================================================
+
+#include <X11/keysym.h>
+
+extern void
+_HALSetJoystickButtons(joystickButtonsF joystickButtons);
+
+//==============================================================================
+// kts FIX: quick hack to get onto linux, relace with a key table
+
+static joystickButtonsF _joystickButtons = 0;
+
+static 
+void ProcessXEvents(XEvent event)
+{
+    KeySym key;
+
+    switch(event.type)
+    {
+        case ConfigureNotify: 
+            {
+
+                reshape(event.xconfigure.width, event.xconfigure.height);
+//
+//
+//              /* this approach preserves a 1:1 viewport aspect ratio */
+//              int vX, vY, vW, vH;
+//              int eW = event.xconfigure.width, eH = event.xconfigure.height;
+//              if(eW >= eH)
+//              {
+//                  vX = 0;
+//                  vY = (eH - eW) >> 1;
+//                  vW = vH = eW;
+//              }
+//              else
+//              {
+//                  vX = (eW - eH) >> 1;
+//                  vY = 0;
+//                  vW = vH = eH;
+//              }
+//              glViewport(vX, vY, vW, vH);
+//              AssertGLOK();
+            }
+            break;
+
+        case KeyPress:
+            // printf("key %x pressed\n",key);
+            key = XLookupKeysym(&event.xkey, 0);
+            switch(key)
+            {
+                case(XK_KP_4):
+                case(XK_Left):
+                case(XK_KP_Left):
+                case(XK_j):
+                case(XK_J):
+                    _joystickButtons |= EJ_BUTTONF_LEFT;
+                    break;
+                case(XK_KP_6):
+                case(XK_Right):
+                case(XK_KP_Right):
+                case(XK_L):
+                case(XK_l):
+                    _joystickButtons |= EJ_BUTTONF_RIGHT;
+                    break;
+                case(XK_KP_8):
+                case(XK_Up):
+                case(XK_KP_Up):
+                case(XK_i):
+                case(XK_I):
+                    _joystickButtons |= EJ_BUTTONF_UP;
+                    break;
+                case(XK_KP_2):
+                case(XK_Down):
+                case(XK_KP_Down):
+                case(XK_k):
+                case(XK_K):
+                    _joystickButtons |= EJ_BUTTONF_DOWN;
+                    break;
+                case XK_KP_Insert:
+                case XK_1:
+                    _joystickButtons |= EJ_BUTTONF_A;
+                    break;
+                case XK_KP_Delete:
+                case XK_2:
+                    _joystickButtons |= EJ_BUTTONF_B;
+                    break;
+                case XK_KP_Enter:
+                case XK_3:
+                    _joystickButtons |= EJ_BUTTONF_C;
+                    break;
+                case(XK_KP_Add):
+                case XK_4:
+                    _joystickButtons |= EJ_BUTTONF_D;
+                    break;
+                case(XK_KP_Subtract):
+                case XK_5:
+                    _joystickButtons |= EJ_BUTTONF_E;
+                    break;
+                case(XK_KP_Multiply):
+                case XK_6:
+                    _joystickButtons |= EJ_BUTTONF_F;
+                    break;
+                case(XK_KP_Divide):
+                case(XK_7):
+                    _joystickButtons |= EJ_BUTTONF_G;
+                    break;
+                case(XK_KP_7):
+                case(XK_8):
+                    _joystickButtons |= EJ_BUTTONF_H;
+                    break;
+                case(XK_KP_9):
+                case XK_9:
+                    _joystickButtons |= EJ_BUTTONF_I;
+                    break;
+                case(XK_KP_3):
+                case XK_0:
+                    _joystickButtons |= EJ_BUTTONF_J;
+                    break;
+                case(XK_KP_1):
+                case XK_exclam:
+                    _joystickButtons |= EJ_BUTTONF_K;
+                    break;
+                case XK_Escape:
+                    sys_exit(0);
+//                 case XK_Escape:
+//                     _joystickButtons |= 0x80000000;
+                    break;
+                default: 
+                    printf("unknown key %x pressed, XK_KP_Enter = %x\n",key,XK_KP_Enter);
+                    break;
+            }
+            break;
+
+        case KeyRelease:
+            // printf("key %x released\n",key);
+            key = XLookupKeysym(&event.xkey, 0);
+            switch(key)
+            {
+                case(XK_KP_4):
+                case(XK_Left):
+                case(XK_KP_Left):
+                case(XK_J):
+                case(XK_j):
+                    _joystickButtons &= ~EJ_BUTTONF_LEFT;
+                    break;
+                case(XK_KP_6):
+                case(XK_Right):
+                case(XK_KP_Right):
+                case(XK_L):
+                case(XK_l):
+                    _joystickButtons &= ~EJ_BUTTONF_RIGHT;
+                    break;
+                case(XK_KP_8):
+                case(XK_Up):
+                case(XK_KP_Up):
+                case(XK_i):
+                case(XK_I):
+                    _joystickButtons &= ~EJ_BUTTONF_UP;
+                    break;
+                case(XK_KP_2):
+                case(XK_Down):
+                case(XK_KP_Down):
+                case(XK_K):
+                case(XK_k):
+                    _joystickButtons &= ~EJ_BUTTONF_DOWN;
+                    break;
+                case XK_KP_Insert:
+                case XK_1:
+                    _joystickButtons &= ~EJ_BUTTONF_A;
+                    break;
+                case XK_KP_Delete:
+                case XK_2:
+                    _joystickButtons &= ~EJ_BUTTONF_B;
+                    break;
+                case XK_KP_Enter:
+                case XK_3:
+                    _joystickButtons &= ~EJ_BUTTONF_C;
+                    break;
+                case(XK_KP_Add):
+                case XK_4:
+                    _joystickButtons &= ~EJ_BUTTONF_D;
+                    break;
+                case(XK_KP_Subtract):
+                case XK_5:
+                    _joystickButtons &= ~EJ_BUTTONF_E;
+                    break;
+                case(XK_KP_Multiply):
+                case XK_6:
+                    _joystickButtons &= ~EJ_BUTTONF_F;
+                    break;
+                case(XK_KP_Divide):
+                case XK_7:
+                    _joystickButtons &= ~EJ_BUTTONF_G;
+                    break;
+                case(XK_KP_7):
+                case XK_8:
+                    _joystickButtons &= ~EJ_BUTTONF_H;
+                    break;
+                case(XK_KP_9):
+                case XK_9:
+                    _joystickButtons &= ~EJ_BUTTONF_I;
+                    break;
+                case(XK_KP_3):
+                case XK_0:
+                    _joystickButtons &= ~EJ_BUTTONF_J;
+                    break;
+                case(XK_KP_1):
+                case XK_exclam:
+                    _joystickButtons &= ~EJ_BUTTONF_K;
+                    break;
+//                case XK_Escape:
+//                    _joystickButtons &= ~0x8000000;
+                    break;
+                default: 
+                    printf("unknown key %x released\n",key);
+                    break;
+            }
+            break;
+
+
+        case ButtonPressMask:
+            printf("You pressed button %d\n", event.xbutton.button);
+            break;
+
+       case FocusIn :
+          //SetX11AutoRepeat(0);
+          break;
+       case FocusOut :
+          //SetX11AutoRepeat(1);
+          break;
+
+          // kts this doesn't seem to work (at least it doesn't send me a message when the window is being destroyed
+       case DestroyNotify:
+          printf("destroynotify!!\n");
+          //SetX11AutoRepeat(1);
+          break;
+
+        default:
+            break;
+    }
+
+     //printf("pxevent: _joystickButtons = %x\n", _joystickButtons);
+    _HALSetJoystickButtons(_joystickButtons);
+}
+
+//==============================================================================
+
+void XEventLoop()
+{
+    XEvent xev;
+    int num_events;
+
+    XFlush(halDisplay.mainDisplay);
+    num_events = XPending(halDisplay.mainDisplay);
+    while((num_events != 0))
+    {
+        num_events--;
+        XNextEvent(halDisplay.mainDisplay, &xev);
+        ProcessXEvents(xev);
+    }
+
+    // printf("_joystickButtons = %x\n", _joystickButtons);
 }
 
 //==============================================================================

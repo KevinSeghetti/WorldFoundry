@@ -102,7 +102,14 @@ CalcAndSetUV(unsigned char uin, unsigned char vin, const PixelMap& texturePixelM
     float uResult(float(u)/texturePixelMap.GetBaseXSize());                            
     float vResult(float(v)/texturePixelMap.GetBaseYSize());
 #endif
+
+#if defined(RENDERER_GL)
     glTexCoord2f(uResult, vResult);                         
+#elif defined(RENDERER_EGL) 
+    assert(0);
+#else
+#error kts not sure if we need anything here
+#endif
 }
 
 //==============================================================================
@@ -153,12 +160,20 @@ ScrollingMatte::Render(ViewPort&
 
 #if defined(USE_ORDER_TABLES)
 #else
+
+#if defined(RENDERER_GL) 
    glLoadIdentity();
    glEnable( GL_TEXTURE_2D );
    texturePixelMap->SetGLTexture();
    glDisable(GL_LIGHTING);
    glDisable(GL_FOG);
    glColor3f(1.0, 1.0, 1.0);
+
+#elif defined(RENDERER_EGL) 
+   assert(0);
+#else
+#error kts not sure if we need anything here
+#endif
 #endif
 
 
@@ -197,6 +212,7 @@ ScrollingMatte::Render(ViewPort&
 				vp.AddPrimitive(*(Primitive*)&sprite,_depth);
 #else
 
+#if defined(RENDERER_GL) 
             glBegin( GL_QUADS );
             const int XOFFSET = - ((320/2)+16);
             const int YOFFSET = - ((224/2)+16+(16/2));         // add a tile & a half
@@ -227,6 +243,13 @@ ScrollingMatte::Render(ViewPort&
             glVertex3i( ((xIndex*16)-xSmoothScroll)+XOFFSET+16, -(((yIndex*16)-ySmoothScroll)+YOFFSET),    ZOFFSET );
             glEnd();
             AssertGLOK();
+#elif defined(RENDERER_EGL) 
+            assert(0);
+#else
+#error kts not sure if we need anything here
+#endif
+
+
 #endif
 			}
 		}
@@ -264,8 +287,16 @@ ScrollingMatte::Render(ViewPort&
    AssertGLOK();
 #endif
 
+
+#if defined(RENDERER_GL) 
    glEnable(GL_LIGHTING);
    glEnable(GL_FOG);
+#elif defined(RENDERER_EGL) 
+            assert(0);
+#else
+#error kts not sure if we need anything here
+#endif
+
 #endif
 }
 

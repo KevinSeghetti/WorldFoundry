@@ -11,14 +11,16 @@
 //#if SW_DBSTREAM
 
 // kts 4/20/2002 5:33PM windows version at least needs glu for release build
-#include <GL/glu.h>
+//#include <GL/glu.h>
 //#endif
 //#endif
 
 //==============================================================================
 #define AssertGLOK()        AssertGLOKMsg("")
                                              
-#if DO_ASSERTIONS
+#if 0
+// kts turn these back on later
+// DO_ASSERTIONS
 
 #if SW_DBSTREAM
 #define AssertGLOKMsg(string)        \

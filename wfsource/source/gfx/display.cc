@@ -34,6 +34,8 @@
 #pragma comment( lib, "opengl32.lib" )
 
 #elif defined ( RENDERER_EGL)
+// kts haven't investigated separating EGL from GLES
+#include <GLES2/gl2.h>  /* use OpenGL ES 2.x */
 #include <gfx/egl/display.cc>
 
 #elif defined ( RENDERER_XWINDOWS)

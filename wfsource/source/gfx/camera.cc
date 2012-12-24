@@ -299,13 +299,13 @@ ConvertToGLColor(const Color& in, GLfloat* out)
 
 //==============================================================================
 
-GLenum GLLightTable[] = 
-{
-   GL_LIGHT0,
-   GL_LIGHT1,
-   GL_LIGHT2
-};
-
+//GLenum GLLightTable[] =
+//{
+//   GL_LIGHT0,
+//   GL_LIGHT1,
+//   GL_LIGHT2
+//};
+//
 //==============================================================================
 
 void
@@ -445,52 +445,52 @@ RenderCamera::RenderBegin()
 
 #elif defined(RENDERER_PIPELINE_GLES)
 
-   GLfloat lightBlack[] = {
-       0.0, 0.0, 0.0, 1.0
-   };
-
-   GLfloat lightColor[4];
-
-   ConvertToGLColor(_ambientColor, lightColor);
-   glLightModelfv(GL_LIGHT_MODEL_AMBIENT,lightColor);
-
-#if MAX_LIGHTS > GL_MAX_LIGHTS
-#error This GL implemenation does not provide enough lights
-#endif
-
-//#if GL_LIGHT1 != (GL_LIGHT0+1) || GL_LIGHT2 != (GL_LIGHT1+1)
-//#error GL light assumption violated
+//   GLfloat lightBlack[] = {
+//       0.0, 0.0, 0.0, 1.0
+//   };
+//
+//   GLfloat lightColor[4];
+//
+//   ConvertToGLColor(_ambientColor, lightColor);
+//   glLightModelfv(GL_LIGHT_MODEL_AMBIENT,lightColor);
+//
+//#if MAX_LIGHTS > GL_MAX_LIGHTS
+//#error This GL implemenation does not provide enough lights
 //#endif
-
-   glMatrixMode(GL_MODELVIEW);               // so that lights don't get rotated
-   LoadGLMatrixFromMatrix34(_invertedPosition);
-
-    for(int index=0;index < MAX_LIGHTS;index++)
-    {
-        GLfloat lightDirection[4];
-        lightDirection[3] = 0.0;
-        
-        // negate because we store the direction the light travels, where GL stores the lights position
-        lightDirection[0] = -_dirLightDirections[index].X().AsFloat();
-        lightDirection[1] = -_dirLightDirections[index].Y().AsFloat();
-        lightDirection[2] = -_dirLightDirections[index].Z().AsFloat();
-//        cout << "light direction[" << index << "]: " << _dirLightDirections[index] << endl;
-//        cout << "light color: " << _dirLightColors[index] << endl;
-        glLightfv(GLLightTable[index],GL_POSITION,lightDirection);
-        
-        ConvertToGLColor(_dirLightColors[index],lightColor);
-        
-        glLightfv(GLLightTable[index],GL_AMBIENT,lightBlack);
-        glLightfv(GLLightTable[index],GL_DIFFUSE,lightColor);
-        glLightfv(GLLightTable[index],GL_SPECULAR,lightBlack);
-        AssertGLOK();
-    }
-
-   ConvertToGLColor(_fogColor,lightColor);
-   glFogfv(GL_FOG_COLOR, lightColor); 
-   glFogf(GL_FOG_START,_fogNear.AsFloat());
-   glFogf(GL_FOG_END,_fogFar.AsFloat());
-   glFogf(GL_FOG_MODE,GL_LINEAR);
+//
+////#if GL_LIGHT1 != (GL_LIGHT0+1) || GL_LIGHT2 != (GL_LIGHT1+1)
+////#error GL light assumption violated
+////#endif
+//
+//   glMatrixMode(GL_MODELVIEW);               // so that lights don't get rotated
+//   LoadGLMatrixFromMatrix34(_invertedPosition);
+//
+//    for(int index=0;index < MAX_LIGHTS;index++)
+//    {
+//        GLfloat lightDirection[4];
+//        lightDirection[3] = 0.0;
+//
+//        // negate because we store the direction the light travels, where GL stores the lights position
+//        lightDirection[0] = -_dirLightDirections[index].X().AsFloat();
+//        lightDirection[1] = -_dirLightDirections[index].Y().AsFloat();
+//        lightDirection[2] = -_dirLightDirections[index].Z().AsFloat();
+////        cout << "light direction[" << index << "]: " << _dirLightDirections[index] << endl;
+////        cout << "light color: " << _dirLightColors[index] << endl;
+//        glLightfv(GLLightTable[index],GL_POSITION,lightDirection);
+//
+//        ConvertToGLColor(_dirLightColors[index],lightColor);
+//
+//        glLightfv(GLLightTable[index],GL_AMBIENT,lightBlack);
+//        glLightfv(GLLightTable[index],GL_DIFFUSE,lightColor);
+//        glLightfv(GLLightTable[index],GL_SPECULAR,lightBlack);
+//        AssertGLOK();
+//    }
+//
+//   ConvertToGLColor(_fogColor,lightColor);
+//   glFogfv(GL_FOG_COLOR, lightColor);
+//   glFogf(GL_FOG_START,_fogNear.AsFloat());
+//   glFogf(GL_FOG_END,_fogFar.AsFloat());
+//   glFogf(GL_FOG_MODE,GL_LINEAR);
 
 #elif defined(RENDERER_PIPELINE_DIRECTX)
 

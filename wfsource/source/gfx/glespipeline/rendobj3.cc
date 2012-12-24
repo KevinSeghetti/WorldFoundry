@@ -60,7 +60,7 @@ RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
       Vector3( position[3][0],-position[3][1],-position[3][2])
    );
   globalRendererVariables.GTEMatrix = inverted;
-
+#if 0          //          GLES port
   glMatrixMode( GL_MODELVIEW );
   LoadGLMatrixFromMatrix34(position);
 
@@ -106,6 +106,7 @@ RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
 	}
 	assert(_faceList[_faceCount].materialIndex = -1);
 //	cout << "RenderObject3D::Render: done" << std::endl;
+#endif
 }
 
 //============================================================================
