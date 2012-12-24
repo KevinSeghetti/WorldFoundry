@@ -15,7 +15,7 @@ GL_LIB =  -lEGL
 endif
 
 ifeq ($(RENDERER_PIPELINE),gles)
-GL_LIB =  -lGLES
+GL_LIB =  -lGLESv2
 endif
 
 ifeq ($(RENDERER_PIPELINE),gl)
@@ -25,6 +25,12 @@ endif
 ifeq ($(RENDERER), gl)
 GL_LIB = -lGLU -lGL
 endif
+
+ifeq ($(RENDERER), egl)
+GL_LIB = -lGLU -lGL
+GL_LIB += -lEGL 
+endif
+
 
 ODE_LIB = -lode 
 
