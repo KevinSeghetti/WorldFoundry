@@ -33,9 +33,9 @@
 #include <pigsys/pigsys.hp>
 #include <gfx/color.hp>
 #include <gfx/renderer.hp>
-// kts temp
-#include <GLES2/gl2.h>  /* use OpenGL ES 2.x */
-    
+#if defined(RENDERER_EGL)
+#    include <GLES2/gl2.h>  /* use OpenGL ES 2.x */
+#endif    
 //==============================================================================
 
 #if defined(RENDERER_GL)
