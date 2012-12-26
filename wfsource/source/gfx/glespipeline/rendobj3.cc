@@ -26,6 +26,7 @@
 // included from gfx/rendobj3
 
 #include <cpplib/stdstrm.hp>
+#include <cpplib/libstrm.hp>
 #include <math/vector3.hp>
 #include <math/matrix34.hp>
 #include <gfx/prim.hp>
@@ -49,6 +50,8 @@ RendererVariables globalRendererVariables;
 void
 RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
 {
+   DBSTREAM1( cgfx<< "RenderObject3D::Render" << std::endl; )
+
 	globalRendererVariables.viewPort = &vp;
 //	cout << "RenderObject3D::Render: " << std::endl;
 
@@ -60,53 +63,51 @@ RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
       Vector3( position[3][0],-position[3][1],-position[3][2])
    );
   globalRendererVariables.GTEMatrix = inverted;
-#if 0          //          GLES port
-  glMatrixMode( GL_MODELVIEW );
+//  glMatrixMode( GL_MODELVIEW );
   LoadGLMatrixFromMatrix34(position);
+//
+   Primitive* primitive  = _primList[0];
+   pRenderObj3DFunc renderer;
 
-	Primitive* primitive  = _primList[0];
-	pRenderObj3DFunc renderer;
+   globalRendererVariables.currentRenderFace = _faceList;
+   for(int faceIndex=0;faceIndex<_faceCount;)
+   {
+      DBSTREAM3( cdebug << "Drawing face " << faceIndex << std::endl; )
 
-	globalRendererVariables.currentRenderFace = _faceList;
-	for(int faceIndex=0;faceIndex<_faceCount;)
-	{
-		DBSTREAM3( cdebug << "Drawing face " << faceIndex << std::endl; )
+      assert(globalRendererVariables.currentRenderFace->materialIndex >= 0);
+      assert(globalRendererVariables.currentRenderFace->materialIndex < 100);  // kts temp
+      globalRendererVariables.currentRenderMaterial = &_materialList[globalRendererVariables.currentRenderFace->materialIndex];
+      assert( globalRendererVariables.currentRenderMaterial );
+      globalRendererVariables.currentRenderMaterial->Validate();
+      renderer = globalRendererVariables.currentRenderMaterial->Get3DRenderer();
+      int currentMaterial = globalRendererVariables.currentRenderFace->materialIndex;
 
-		assert(globalRendererVariables.currentRenderFace->materialIndex >= 0);
-		assert(globalRendererVariables.currentRenderFace->materialIndex < 100);  // kts temp
-		globalRendererVariables.currentRenderMaterial = &_materialList[globalRendererVariables.currentRenderFace->materialIndex];
-		assert( globalRendererVariables.currentRenderMaterial );
-		globalRendererVariables.currentRenderMaterial->Validate();
-		renderer = globalRendererVariables.currentRenderMaterial->Get3DRenderer();
-		int currentMaterial = globalRendererVariables.currentRenderFace->materialIndex;
+      while(currentMaterial == globalRendererVariables.currentRenderFace->materialIndex && faceIndex<_faceCount)
+      {
+         globalRendererVariables.gteVect[0] = Vector3ToPS(_vertexList[globalRendererVariables.currentRenderFace->v1Index].position);
+         globalRendererVariables.gteVect[1] = Vector3ToPS(_vertexList[globalRendererVariables.currentRenderFace->v2Index].position);
+         globalRendererVariables.gteVect[2] = Vector3ToPS(_vertexList[globalRendererVariables.currentRenderFace->v3Index].position);
 
-		while(currentMaterial == globalRendererVariables.currentRenderFace->materialIndex && faceIndex<_faceCount)
-		{
-			globalRendererVariables.gteVect[0] = Vector3ToPS(_vertexList[globalRendererVariables.currentRenderFace->v1Index].position);
-			globalRendererVariables.gteVect[1] = Vector3ToPS(_vertexList[globalRendererVariables.currentRenderFace->v2Index].position);
-			globalRendererVariables.gteVect[2] = Vector3ToPS(_vertexList[globalRendererVariables.currentRenderFace->v3Index].position);
+         assert( ValidPtr(globalRendererVariables.currentRenderFace) );
+         //globalRendererVariables.currentRenderFace->Validate();
 
-			assert( ValidPtr(globalRendererVariables.currentRenderFace) );
-			//globalRendererVariables.currentRenderFace->Validate();
-
-			assert(ValidPtr(this));
-	#if defined(__WIN__)
-			long* rendererPtr = (long*)&renderer;
-	//		cout << "rendererPtr = " << rendererPtr << std::endl;
-	//		cout << "renderer = " << hex << *rendererPtr << std::endl;
-			assert(ValidCodePtr((void*)(*rendererPtr)));
-	#endif
-	//		cout << "RenderObject3D::Render: calling renderer " << std::endl;
-			(this->*renderer)(primitive);
-	//		cout << "RenderObject3D::Render: done calling renderer " << std::endl;
-			primitive++;
-			faceIndex++;
-			globalRendererVariables.currentRenderFace++;
-		}
-	}
-	assert(_faceList[_faceCount].materialIndex = -1);
-//	cout << "RenderObject3D::Render: done" << std::endl;
-#endif
+         assert(ValidPtr(this));
+   #if defined(__WIN__)
+         long* rendererPtr = (long*)&renderer;
+   //    cout << "rendererPtr = " << rendererPtr << std::endl;
+   //    cout << "renderer = " << hex << *rendererPtr << std::endl;
+         assert(ValidCodePtr((void*)(*rendererPtr)));
+   #endif
+   //    cout << "RenderObject3D::Render: calling renderer " << std::endl;
+         (this->*renderer)(primitive);
+   //    cout << "RenderObject3D::Render: done calling renderer " << std::endl;
+         primitive++;
+         faceIndex++;
+         globalRendererVariables.currentRenderFace++;
+      }
+   }
+   assert(_faceList[_faceCount].materialIndex = -1);
+   DBSTREAM1( cgfx << "RenderObject3D::Render: done" << std::endl; )
 }
 
 //============================================================================
