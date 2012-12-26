@@ -19,8 +19,23 @@
 // or see www.fsf.org
 
 // ===========================================================================
-// Description: The Display class encapsulates data and behavior for a single
-//	 hardware screen
+// Description: gfxtest is a test program which allows testing of the 
+// graphics system without the overhead of the game engine
+//	 
+// Joystick controls:
+// 1     tilt camera down
+// 2     rotate camera left
+// 3     roll camera counterclockwise
+// 4     rotate camera right
+// 5     tilt camera up
+// 6     roll camera counterclockwise
+// 7     move camera forward
+// 8     move camera back
+// left  move camera left
+// right move camera right
+// up    move camera up
+// down  move camera down
+// 
 // Original Author: Kevin T. Seghetti
 //============================================================================
 
@@ -54,6 +69,7 @@
 #include <math/euler.hp>
 #include <iff/iffread.hp>
 #include <cpplib/stdstrm.hp>
+#include <cpplib/libstrm.hp>
 #include <cpplib/strmnull.hp>
 #include <gfx/otable.hp>
 #include <gfx/display.hp>
@@ -906,6 +922,9 @@ ParseCommandLine(int argc, char** argv)
 #if SW_DBSTREAM > 0
 		else if ( tolower( *( argv[index]+1 ) ) == 'p' )
 			RedirectStandardStream(argv[index]+2);
+		else if ( tolower( *( argv[index]+1 ) ) == 'l' )
+			RedirectLibraryStream(argv[index]+2);
+
 #endif
 		else
 			DBSTREAM1( cerror << "game Error: Unrecognized command line switch \"" <<
