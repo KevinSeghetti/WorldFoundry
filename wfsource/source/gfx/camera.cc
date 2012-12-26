@@ -299,13 +299,16 @@ ConvertToGLColor(const Color& in, GLfloat* out)
 
 //==============================================================================
 
-//GLenum GLLightTable[] =
-//{
-//   GL_LIGHT0,
-//   GL_LIGHT1,
-//   GL_LIGHT2
-//};
-//
+#if defined(RENDERER_GL)
+
+GLenum GLLightTable[] =
+{
+   GL_LIGHT0,
+   GL_LIGHT1,
+   GL_LIGHT2
+};
+#endif
+
 //==============================================================================
 
 void
@@ -463,7 +466,7 @@ RenderCamera::RenderBegin()
 ////#endif
 //
 //   glMatrixMode(GL_MODELVIEW);               // so that lights don't get rotated
-//   LoadGLMatrixFromMatrix34(_invertedPosition);
+   LoadGLMatrixFromMatrix34(_invertedPosition);
 //
 //    for(int index=0;index < MAX_LIGHTS;index++)
 //    {
@@ -651,7 +654,7 @@ RenderCamera::RenderObject(RenderObject3D& object,const Matrix34& objectPosition
 	Matrix34 temp(objectPosition);
 	temp *= _invertedPosition;
 
-   //cout << "Final matrix: " << temp << endl;
+   //std::cout << "Final matrix: " << temp << std::endl;
 	object.Render(_viewPort,temp);
 
 #elif defined(RENDERER_PIPELINE_DIRECTX)
