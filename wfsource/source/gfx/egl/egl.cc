@@ -129,44 +129,6 @@ mul_matrix(GLfloat *prod, const GLfloat *a, const GLfloat *b)
 #undef PROD
 }
 
-
-static void
-draw(void)
-{
-   static const GLfloat verts[3][2] = {
-      { -1, -1 },
-      {  1, -1 },
-      {  0,  1 }
-   };
-   static const GLfloat colors[3][3] = {
-      { 1, 0, 0 },
-      { 0, 1, 0 },
-      { 0, 0, 1 }
-   };
-   GLfloat mat[16], rot[16], scale[16];
-
-   /* Set modelview/projection matrix */
-   make_z_rot_matrix(view_rotx, rot);
-   make_scale_matrix(0.5, 0.5, 0.5, scale);
-   mul_matrix(mat, rot, scale);
-   glUniformMatrix4fv(u_matrix, 1, GL_FALSE, mat);
-
-   view_rotx += 5.0;
-
-   {
-      glVertexAttribPointer(attr_pos, 2, GL_FLOAT, GL_FALSE, 0, verts);
-      glVertexAttribPointer(attr_color, 3, GL_FLOAT, GL_FALSE, 0, colors);
-      glEnableVertexAttribArray(attr_pos);
-      glEnableVertexAttribArray(attr_color);
-
-      glDrawArrays(GL_TRIANGLES, 0, 3);
-
-      glDisableVertexAttribArray(attr_pos);
-      glDisableVertexAttribArray(attr_color);
-   }
-}
-
-
 /* new window size or exposure */
 static void
 reshape(int width, int height)

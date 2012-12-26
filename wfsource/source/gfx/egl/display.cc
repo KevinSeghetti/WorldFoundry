@@ -27,7 +27,7 @@
 #include <hal/hal.h>
 //#include <GL/gl.h>
 
-//#include <gfx/egl/wfprim.h>
+#include <gfx/egl/wfprim.h>
 
 #include <memory/memory.hp>
 #include <gfx/pixelmap.hp>
@@ -57,7 +57,6 @@ int wfWindowHeight = 480;
 #include "wgl.cc"
 #endif
 #if defined(__LINUX__)
-//#include "mesa.cc" 
 #include "egl.cc" 
 #include <sys/time.h>
 #include <unistd.h>
@@ -256,7 +255,7 @@ Display::RenderBegin()
 #endif
 
    AssertGLOK();
-   glEnable( GL_TEXTURE_2D );
+   //glEnable( GL_TEXTURE_2D );
    AssertGLOK();
 
 #if 0
@@ -450,8 +449,56 @@ Display::PageFlip()
 #endif // 0
 
 #elif defined(RENDERER_PIPELINE_GLES) 
-    draw();
+
+//  static const GLfloat verts[3][2] = {
+//     { -1, -1 },
+//     {  1, -1 },
+//     {  0,  1 }
+//  };
+//  static const GLfloat colors[3][3] = {
+//     { 1, 0, 0 },
+//     { 0, 1, 0 },
+//     { 0, 0, 1 }
+//  };
+    GLfloat mat[16], rot[16], scale[16];
+
+    /* Set modelview/projection matrix */
+    make_z_rot_matrix(view_rotx, rot);
+    make_scale_matrix(0.5, 0.5, 0.5, scale);
+    mul_matrix(mat, rot, scale);
+
+
+    std::cout << "orig matrix = " <<std::endl;
+    for(int y=0;y<4;y++)
+    {
+        std::cout << "  ";
+        for(int x=0;x<4;x++)
+        {
+            std::cout << mat[(y*4)+x] << " ";
+        }
+        std::cout << std::endl;
+    }
+
+
+    glUniformMatrix4fv(u_matrix, 1, GL_FALSE, mat);
+
+ //   view_rotx += 5.0;
+
+ // {
+ //    glVertexAttribPointer(attr_pos, 2, GL_FLOAT, GL_FALSE, 0, verts);
+ //    glVertexAttribPointer(attr_color, 3, GL_FLOAT, GL_FALSE, 0, colors);
+ //    glEnableVertexAttribArray(attr_pos);
+ //    glEnableVertexAttribArray(attr_color);
+ //
+ //    glDrawArrays(GL_TRIANGLES, 0, 3);
+ //
+ //    glDisableVertexAttribArray(attr_pos);
+ //    glDisableVertexAttribArray(attr_color);
+ // }
+
+    AssertGLOK();
     eglSwapBuffers(halDisplay.eglDisplay, halDisplay.eglSurface);
+    AssertGLOK();
 #else
 #error renderer pipeline not defined!
 #endif
@@ -539,269 +586,17 @@ Display::PageFlip()
 //============================================================================
 
 #if defined(USE_ORDER_TABLES)
-
-inline void
-SetTexture(const PixelMap& texturePixelMap)
-{
-#if defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)
-#else
-    texturePixelMap.SetGLTexture();
-#endif
-}
-
-void 
-CalcAndSetUV(unsigned short tpage, unsigned char uin, unsigned char vin, const PixelMap& texturePixelMap) 
-{
-    ulong u(uin+DecodeTPageX(tpage)); 
-    ulong v(vin+DecodeTPageY(tpage)); 
-
-#if defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)
-    float uResult(float(u)/VRAM_WIDTHF);                            
-    float vResult(float(v)/VRAM_HEIGHTF);                           
-
-    // kts temp test code
-    //texturePixelMap.SetGLTexture();
-#else
-    float uResult(float(u)/texturePixelMap.GetBaseXSize());                            
-    float vResult(float(v)/texturePixelMap.GetBaseYSize());
-#endif
-    glTexCoord2f(uResult, vResult);                         
-}
-
-
-//==============================================================================
-
-inline void
-GL_3D_VERTEX(const Point3D& point)                                                                         
-{                                                                                              
-    float fx = float(point.x) / 65536.0;                                                         
-    float fy = float(point.y) / 65536.0;                                                         
-    float fz = float(point.z) / 65536.0;
-    //cout.setf(ios::fixed,ios::basefield);
-    //cout << "x:" << x << ", y:" << y << ", wx:" << wx << ", wy:" << wy << ", px:" << float(point.x)/65536.0 << ", py:" << float(point.y)/65536.0 << ", pz:" << point.z << ", fz:" << fz << endl; 
-    glVertex4f(fx,-fy,1.0,fz);
-}
-
-//==============================================================================
-
-void
-DrawOTag( ORDER_TABLE_ENTRY* __orderTable )
-{
-    Primitive* _orderTable = (Primitive*)__orderTable;
-
-    assert( _orderTable );
-    Primitive* _orderTableEnd = _orderTable;
-
-    assert( CODE_NOP == 0 );
-
-    // kts temp
-//   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//	glClear( GL_COLOR_BUFFER_BIT );
-
-    //glVertex2f( (float)x, (float)-y );
-
-// #define checkImageWidth 64
-// #define checkImageHeight 64
-// extern GLubyte checkImage[checkImageHeight][checkImageWidth][4];
-
-
-    for(; !isendprim( _orderTable ); _orderTable = (Primitive*)nextPrim( _orderTable ))
-    {
-        ValidatePtr(_orderTable);
-        Primitive* pTag = _orderTable;
-        uint8 code = pTag->base.code;
-#if 0
-        std::cout << "otable code = " << int(_orderTable->code) << std::endl;
-        std::cout << "code = " << int(code) << std::endl;
-#endif
-        //cout << "new poly:" << endl;
-        if(code)
-        {
-            switch(code)
-            {
-                case CODE_POLY_F3:
-                    {
-                        glDisable( GL_TEXTURE_2D );
-                        AssertGLOK();
-                        glBegin( GL_TRIANGLES );
-//					assert(0);
-                        POLY_F3& pPoly = _orderTable->f3;
-
-                        glColor3ub( pPoly.r0, pPoly.g0, pPoly.b0 );
-                    //glColor3ub( rand() % 255, rand() % 255, rand() % 255 );
-#if defined(GFX_ZBUFFER)
-                        GL_3D_VERTEX(pPoly.point0);
-                        GL_3D_VERTEX(pPoly.point1);
-                        GL_3D_VERTEX(pPoly.point2);
-#else /* defined(GFX_ZBUFFER) */
-                        glVertex2i( pPoly.x0, -pPoly.y0 );
-                        glVertex2i( pPoly.x1, -pPoly.y1 );
-                        glVertex2i( pPoly.x2, -pPoly.y2 );
-#endif /* defined(GFX_ZBUFFER) */
-                        glEnd();
-                        AssertGLOK();
-                        glEnable( GL_TEXTURE_2D );
-                        AssertGLOK();
-                        break;
-                    }
-
-                case CODE_POLY_FT3:
-                    {
-//					assert(0);
-                        POLY_FT3& pPoly = _orderTable->ft3;
-                        assert(pPoly.pPixelMap);
-                        SetTexture(*pPoly.pPixelMap);
-                        glBegin( GL_TRIANGLES );
-
-                    //glColor3ub( rand() % 255, rand() % 255, rand() % 255 );
-                    //assert( theTexture );
-                    //glCallList( theTexture );
-                        glColor3ub( 255, 0, 0 );
-                        assert(pPoly.pPixelMap);
-#if defined( GFX_ZBUFFER )
-                        CalcAndSetUV(pPoly.tpage, pPoly.u0,pPoly.v0,*pPoly.pPixelMap);
-                        GL_3D_VERTEX(pPoly.point0);
-                        CalcAndSetUV(pPoly.tpage, pPoly.u1,pPoly.v1,*pPoly.pPixelMap);
-                        GL_3D_VERTEX(pPoly.point1);
-                        CalcAndSetUV(pPoly.tpage, pPoly.u2,pPoly.v2,*pPoly.pPixelMap);
-                        GL_3D_VERTEX(pPoly.point2);
-#else /* GFX_ZBUFFER */
-                        CalcAndSetUV(pPoly.tpage, pPoly.u0,pPoly.v0,*pPoly.pPixelMap);
-                        glVertex2i( pPoly.x0, -pPoly.y0 );
-                        CalcAndSetUV(pPoly.tpage, pPoly.u1,pPoly.v1,*pPoly.pPixelMap);
-                        glVertex2i( pPoly.x1, -pPoly.y1 );
-                        CalcAndSetUV(pPoly.tpage, pPoly.u2,pPoly.v2,*pPoly.pPixelMap);
-                        glVertex2i( pPoly.x2, -pPoly.y2 );
-#endif /* GFX_ZBUFFER */
-                        glEnd();
-                        AssertGLOK();
-                        break;
-                    }
-
-                case CODE_POLY_G3:
-                    {
-                        glDisable( GL_TEXTURE_2D );
-                        AssertGLOK();
-                        glBegin( GL_TRIANGLES );
-                        POLY_G3& pPoly = _orderTable->g3;
-
-#if defined ( GFX_ZBUFFER )
-//					glVertex2i( pPoly.x0, - (pPoly.y0) );
-                        glColor3f( float(pPoly.r0)/128, float(pPoly.g0)/128, float(pPoly.b0)/128 );
-                        GL_3D_VERTEX(pPoly.point0);
-                        glColor3f( float(pPoly.r1)/128, float(pPoly.g1)/128, float(pPoly.b1)/128 );
-                        GL_3D_VERTEX(pPoly.point1);
-                        glColor3f( float(pPoly.r2)/128, float(pPoly.g2)/128, float(pPoly.b2)/128 );
-                        GL_3D_VERTEX(pPoly.point2);
-#else /* GFX_ZBUFFER */
-                        glColor3f( float(pPoly.r0)/128, float(pPoly.g0)/128, float(pPoly.b0)/128 );
-                        glVertex2i( pPoly.x0, -pPoly.y0 );
-                        glColor3f( float(pPoly.r1)/128, float(pPoly.g1)/128, float(pPoly.b1)/128 );
-                        glVertex2i( pPoly.x1, -pPoly.y1 );
-                        glColor3f( float(pPoly.r2)/128, float(pPoly.g2)/128, float(pPoly.b2)/128 );
-                        glVertex2i( pPoly.x2, -pPoly.y2 );
-#endif /* GFX_ZBUFFER */
-                        glEnd();
-                        AssertGLOK();
-                        glEnable( GL_TEXTURE_2D );
-                        AssertGLOK();
-                        break;
-                    }
-
-                case CODE_POLY_GT3:
-                    {
-                        POLY_GT3& pPoly = _orderTable->gt3;
-                        assert(pPoly.pPixelMap);
-                        SetTexture(*pPoly.pPixelMap);
-                        glBegin( GL_TRIANGLES );
-                        CalcAndSetUV(pPoly.tpage, pPoly.u0,pPoly.v0,*pPoly.pPixelMap);
-#if defined ( GFX_ZBUFFER )
-                        glColor3f( float(pPoly.r0)/128, float(pPoly.g0)/128, float(pPoly.b0)/128 );
-                        GL_3D_VERTEX(pPoly.point0);
-                        CalcAndSetUV(pPoly.tpage, pPoly.u1,pPoly.v1,*pPoly.pPixelMap);
-                        glColor3f( float(pPoly.r1)/128, float(pPoly.g1)/128, float(pPoly.b1)/128 );
-                        GL_3D_VERTEX(pPoly.point1);
-                        CalcAndSetUV(pPoly.tpage, pPoly.u2,pPoly.v2,*pPoly.pPixelMap);
-                        glColor3f( float(pPoly.r2)/128, float(pPoly.g2)/128, float(pPoly.b2)/128 );
-                        GL_3D_VERTEX(pPoly.point2);
-#else /* GFX_ZBUFFER */
-                        glColor3f( float(pPoly.r0)/128, float(pPoly.g0)/128, float(pPoly.b0)/128 );
-                        glVertex2i( pPoly.x0, -pPoly.y0 );
-                        CalcAndSetUV(pPoly.tpage, pPoly.u1,pPoly.v1,*pPoly.pPixelMap);
-                        glColor3f( float(pPoly.r1)/128, float(pPoly.g1)/128, float(pPoly.b1)/128 );
-                        glVertex2i( pPoly.x1, -pPoly.y1 );
-                        CalcAndSetUV(pPoly.tpage, pPoly.u2,pPoly.v2,*pPoly.pPixelMap);
-                        glColor3f( float(pPoly.r2)/128, float(pPoly.g2)/128, float(pPoly.b2)/128 );
-                        glVertex2i( pPoly.x2, -pPoly.y2 );
-#endif /* GFX_ZBUFFER */
-                        glEnd();
-                        AssertGLOK();
-                        break;
-                    }
-
-                case CODE_SPRT_16:
-                    {
-                        glDisable( GL_TEXTURE_2D );
-                        AssertGLOK();
-                        glBegin( GL_TRIANGLES );
-                        SPRT_16& pPoly = _orderTable->sp16;
-
-//					float u0 = pPoly.u0;
-//					float v0 = pPoly.v0;
-//					u0 /= VRAM_WIDTHF;
-//					v0 /= VRAM_HEIGHTF;
-//					glTexCoord2f( u0, v0 );
-                        glColor3f( float(pPoly.r0)/128, float(pPoly.g0)/128, float(pPoly.b0)/128 );
-#if defined( GFX_ZBUFFER )
-// nlin: uh, what does this do?	need to change to use 3d coords for persp. correction				glVertex2i( pPoly.x0, - (pPoly.y0) );
-#else /* GFX_ZBUFFER */
-                        glVertex2i( pPoly.x0, -pPoly.y0 );
-#endif /* GFX_ZBUFFER */
-
-//					float u1 = pPoly.u0 + 16;
-//					float v1 = pPoly.v0 + 16;
-//					u1 /= VRAM_WIDTHF;
-//					v1 /= VRAM_HEIGHTF;
-//					glTexCoord2f( u1, v1 );
-                        glColor3f( float(pPoly.r0)/128, float(pPoly.g0)/128, float(pPoly.b0)/128 );
-#if defined ( GFX_ZBUFFER )
-
-// nlin: uh, what does this do?need to change to use 3d coords for persp. correction					glVertex2i( pPoly.x0 + 16, - (pPoly.y0 + 16) );
-#else /* GFX_ZBUFFER */
-                        glVertex2i( pPoly.x0 + 16,  -pPoly.y0 + 16 );
-#endif /* GFX_ZBUFFER */
-                        glEnd();
-                        AssertGLOK();
-                        glEnable( GL_TEXTURE_2D );
-                        AssertGLOK();
-                        break;
-                    }
-
-                default:
-                    {
-                        DBSTREAM1( std::cout << "code = " << int( code ) << std::endl; )
-                        break;
-                    }
-            }
-        }
-    }
-    AssertGLOK();
-    glDisable(GL_TEXTURE_2D);
-    AssertGLOK();
-}
-
-//==============================================================================
-
+#error order tables not supported in egl (no reason for them)
 #endif									// defined(USE_ORDER_TABLES)
-
 
 //==============================================================================
 
 void
 LoadGLMatrixFromMatrix34(const Matrix34& matrix)
 {
+    AssertGLOK();
 
-    GLfloat mat[16];
+    static GLfloat mat[16];
     mat[(0*4)+0] = matrix[0][0].AsFloat();
     mat[(0*4)+1] = matrix[0][1].AsFloat();
     mat[(0*4)+2] = matrix[0][2].AsFloat();
@@ -822,7 +617,19 @@ LoadGLMatrixFromMatrix34(const Matrix34& matrix)
     mat[(3*4)+2] = matrix[3][2].AsFloat();
     mat[(3*4)+3] = 1.0;
 
-    //glLoadMatrixf(mat);
+    std::cout << "matrix = " << matrix << std::endl;
+    std::cout << "matrix = " <<std::endl;
+    for(int y=0;y<4;y++)
+    {
+        std::cout << "  ";
+        for(int x=0;x<4;x++)
+        {
+            std::cout << mat[(y*4)+x] << " ";
+        }
+        std::cout << std::endl;
+    }
+    glUniformMatrix4fv(u_matrix, 1, GL_TRUE, mat);
+    AssertGLOK();
 }
 
 //==============================================================================

@@ -16,13 +16,15 @@
 //#endif
 
 //==============================================================================
+        
 #define AssertGLOK()        AssertGLOKMsg("")
-                                             
-#if 0
+                                     
+#if 1
 // kts turn these back on later
 // DO_ASSERTIONS
 
 #if SW_DBSTREAM
+
 #define AssertGLOKMsg(string)        \
 {                           \
     GLenum glError = glGetError(); \
@@ -30,7 +32,7 @@
     { \
         while(glError != GL_NO_ERROR) \
         { \
-            DBSTREAM1(cerror << "GL error: " << glError << " : " << gluErrorString(glError) << std::endl; \
+            DBSTREAM1(cerror << "GL error: " << glError << std::endl; \
             cerror << "WFError: " << string << std::endl;) \
             glError = glGetError(); \
         } \
