@@ -468,16 +468,16 @@ Display::PageFlip()
     mul_matrix(mat, rot, scale);
 
 
-    std::cout << "orig matrix = " <<std::endl;
-    for(int y=0;y<4;y++)
-    {
-        std::cout << "  ";
-        for(int x=0;x<4;x++)
-        {
-            std::cout << mat[(y*4)+x] << " ";
-        }
-        std::cout << std::endl;
-    }
+//  std::cout << "orig matrix = " <<std::endl;
+//  for(int y=0;y<4;y++)
+//  {
+//      std::cout << "  ";
+//      for(int x=0;x<4;x++)
+//      {
+//          std::cout << mat[(y*4)+x] << " ";
+//      }
+//      std::cout << std::endl;
+//  }
 
 
     glUniformMatrix4fv(u_matrix, 1, GL_FALSE, mat);
@@ -617,8 +617,9 @@ LoadGLMatrixFromMatrix34(const Matrix34& matrix)
     mat[(3*4)+2] = matrix[3][2].AsFloat();
     mat[(3*4)+3] = 1.0;
 
-    std::cout << "matrix = " << matrix << std::endl;
-    std::cout << "matrix = " <<std::endl;
+    std::cout << "LoadGLMatrixFrommatrix34: matrix = " << matrix << std::endl;
+
+    std::cout << "translated matrix = " <<std::endl;
     for(int y=0;y<4;y++)
     {
         std::cout << "  ";
@@ -628,7 +629,7 @@ LoadGLMatrixFromMatrix34(const Matrix34& matrix)
         }
         std::cout << std::endl;
     }
-    glUniformMatrix4fv(u_matrix, 1, GL_TRUE, mat);
+    glUniformMatrix4fv(u_matrix, 1, GL_FALSE, mat);
     AssertGLOK();
 }
 
