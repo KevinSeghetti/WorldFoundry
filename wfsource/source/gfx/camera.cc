@@ -591,7 +591,7 @@ RenderCamera::RenderEnd()
 void
 RenderCamera::RenderObject(RenderObject3D& object,const Matrix34& objectPosition)
 {
-    DBSTREAM1( cgfx<< "RenderCamera::RenderObject" << std::endl; )
+    DBSTREAM1( cgfx<< "RenderCamera::RenderObject:" << objectPosition << std::endl; )
 	_viewPort.Validate();
 	assert(_renderInProgress);
 	// set up lighting
