@@ -142,7 +142,7 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
 //   GL_3D_VERTEX(globalRendererVariables.gteVect[1]);
 //   GL_3D_VERTEX(globalRendererVariables.gteVect[2]);
 
-   glVertexAttribPointer(attr_pos, 2, GL_FIXED, GL_FALSE, 0, reinterpret_cast<const GLfixed **>(globalRendererVariables.gteVect));
+   glVertexAttribPointer(attr_pos, 3, GL_FIXED, GL_FALSE, 0, reinterpret_cast<const GLfixed **>(globalRendererVariables.gteVect));
    AssertGLOK();
    glVertexAttribPointer(attr_color, 3, GL_FLOAT, GL_FALSE, 0, colors);
    AssertGLOK();
@@ -180,7 +180,7 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
 //   glMaterialfv(GL_FRONT, GL_AMBIENT, color);
 //   glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
 //   GL_3D_VERTEX(globalRendererVariables.gteVect[2]);
-   glVertexAttribPointer(attr_pos, 2, GL_FIXED, GL_FALSE, 0, reinterpret_cast<const GLfixed **>(globalRendererVariables.gteVect));
+   glVertexAttribPointer(attr_pos, 3, GL_FIXED, GL_FALSE, 0, reinterpret_cast<const GLfixed **>(globalRendererVariables.gteVect));
    glVertexAttribPointer(attr_color, 3, GL_FLOAT, GL_FALSE, 0, colors);
    glEnableVertexAttribArray(attr_pos);
    glEnableVertexAttribArray(attr_color);
@@ -214,7 +214,7 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
 //   GL_3D_VERTEX(globalRendererVariables.gteVect[1]);
 //   CalcAndSetUV(poly.tpage, poly.u2,poly.v2,*poly.pPixelMap);
 //   GL_3D_VERTEX(globalRendererVariables.gteVect[2]);
-   glVertexAttribPointer(attr_pos, 2, GL_FIXED, GL_FALSE, 0, reinterpret_cast<const GLfixed **>(globalRendererVariables.gteVect));
+   glVertexAttribPointer(attr_pos, 3, GL_FIXED, GL_FALSE, 0, reinterpret_cast<const GLfixed **>(globalRendererVariables.gteVect));
    glVertexAttribPointer(attr_color, 3, GL_FLOAT, GL_FALSE, 0, colors);
    glEnableVertexAttribArray(attr_pos);
    glEnableVertexAttribArray(attr_color);
@@ -248,7 +248,7 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
 //   glMaterialfv(GL_FRONT, GL_AMBIENT, color);
 //   glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
 //   GL_3D_VERTEX(globalRendererVariables.gteVect[2]);
-   glVertexAttribPointer(attr_pos, 2, GL_FIXED, GL_FALSE, 0, reinterpret_cast<const GLfixed **>(globalRendererVariables.gteVect));
+   glVertexAttribPointer(attr_pos, 3, GL_FIXED, GL_FALSE, 0, reinterpret_cast<const GLfixed **>(globalRendererVariables.gteVect));
    glVertexAttribPointer(attr_color, 3, GL_FLOAT, GL_FALSE, 0, colors);
    glEnableVertexAttribArray(attr_pos);
    glEnableVertexAttribArray(attr_color);
