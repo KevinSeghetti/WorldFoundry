@@ -48,8 +48,8 @@
 #define TEST_MODEL_LOAD 0
 #define ANIMATE_MATERIAL 0
 #define ANIMATE_VERTEX 0
-#define ANIMATE_POSITION 1
-#define ANIMATE_ROTATION 1 
+#define ANIMATE_POSITION 0
+#define ANIMATE_ROTATION 0 
 
 #if TEST_MODEL_LOAD
 #if !DO_DEBUG_FILE_SYSTEM
@@ -211,6 +211,8 @@ AdjustCameraParameters(Vector3& position,Euler& rotation,joystickButtonsF button
 {
 #define ADJUST_ANGLE 1
 #define ADJUST_DELTA 0.05
+
+//   std::cout << "buttons = " << buttons1 << std::endl;
 	// change the rotation angles for the cube and the light source
 	if (buttons1 & EJ_BUTTONF_E)
 		rotation.SetA(rotation.GetA() + Angle(Angle::Degree(SCALAR_CONSTANT(ADJUST_ANGLE))));
@@ -425,7 +427,8 @@ GFXTester::GFXTester() :
 #endif
 	vp(display,4000,Scalar( 320, 0 ), Scalar( 240, 0 ), testMemory, 2 )
 #if TEST_3D
-	,position3D(SCALAR_CONSTANT(-5),SCALAR_CONSTANT(0),SCALAR_CONSTANT(ZMAXLIMIT)),
+	//,position3D(SCALAR_CONSTANT(-5),SCALAR_CONSTANT(0),SCALAR_CONSTANT(ZMAXLIMIT)),
+	,position3D(SCALAR_CONSTANT(0),SCALAR_CONSTANT(0),SCALAR_CONSTANT(0)),
 	delta3D(SCALAR_CONSTANT(0.1*speed),SCALAR_CONSTANT(0.1333*speed),SCALAR_CONSTANT(0.3*speed)),
 	rot3D(Angle::zero,Angle::zero, Angle::zero),
 	deltaRot3D(Angle::Degree(SCALAR_CONSTANT(4*speed)),Angle::Degree(SCALAR_CONSTANT(5*speed)),Angle::Degree(SCALAR_CONSTANT(0))),
@@ -493,16 +496,16 @@ GFXTester::GFXTester() :
 	cubeVertexList[6] = Vertex3D( SCALAR_CONSTANT( 1), SCALAR_CONSTANT( 0),Color(0,0,128), Vector3_PS( PS_SCALAR_CONSTANT( SIZE),PS_SCALAR_CONSTANT( SIZE),PS_SCALAR_CONSTANT(-SIZE)) );
 	cubeVertexList[7] = Vertex3D( SCALAR_CONSTANT( 0), SCALAR_CONSTANT( 0),Color(128,128,0), Vector3_PS( PS_SCALAR_CONSTANT(-SIZE),PS_SCALAR_CONSTANT( SIZE),PS_SCALAR_CONSTANT(-SIZE)) );
 
-	cubeFaceList[0] = TriFace(0,1,2,0,cubeVertexList);                       // front(top)
-	cubeFaceList[1] = TriFace(1,3,2,0,cubeVertexList);
-	cubeFaceList[2] = TriFace(4,0,2,1,cubeVertexList);                       // left side
-	cubeFaceList[3] = TriFace(2,7,4,1,cubeVertexList);
-	cubeFaceList[4] = TriFace(1,5,6,2,cubeVertexList);                       // right side
-	cubeFaceList[5] = TriFace(3,1,6,2,cubeVertexList);
-	cubeFaceList[6] = TriFace(4,5,1,3,cubeVertexList);                       // top(back)
-	cubeFaceList[7] = TriFace(4,1,0,3,cubeVertexList);
-	cubeFaceList[8] = TriFace(2,3,6,4,cubeVertexList);                       // bottom(front)
-	cubeFaceList[9] = TriFace(6,7,2,4,cubeVertexList);
+	cubeFaceList[0]  = TriFace(0,1,2,0,cubeVertexList);                       // front(top)
+	cubeFaceList[1]  = TriFace(1,3,2,0,cubeVertexList);
+	cubeFaceList[2]  = TriFace(4,0,2,1,cubeVertexList);                       // left side
+	cubeFaceList[3]  = TriFace(2,7,4,1,cubeVertexList);
+	cubeFaceList[4]  = TriFace(1,5,6,2,cubeVertexList);                       // right side
+	cubeFaceList[5]  = TriFace(3,1,6,2,cubeVertexList);
+	cubeFaceList[6]  = TriFace(4,5,1,3,cubeVertexList);                       // top(back)
+	cubeFaceList[7]  = TriFace(4,1,0,3,cubeVertexList);
+	cubeFaceList[8]  = TriFace(2,3,6,4,cubeVertexList);                       // bottom(front)
+	cubeFaceList[9]  = TriFace(6,7,2,4,cubeVertexList);
 	cubeFaceList[10] = TriFace(5,4,7,5,cubeVertexList);                       // back(bottom)
 	cubeFaceList[11] = TriFace(5,7,6,5,cubeVertexList);
 	cubeFaceList[12] = TriFace(0,0,0,-1);  // end of face list marker
@@ -693,10 +696,11 @@ GFXTester::Render()
 		camera.RenderBegin();
 		Matrix34 mat(rot3D,position3D);
 
+      //std::cout << "gfxtest matrix = " << mat << std::endl;
 		camera.RenderObject(*object3D,mat);
 
 		Matrix34 mat2(rot3D2,position3D2);
-		camera.RenderObject(*object3D2,mat2);
+		//camera.RenderObject(*object3D2,mat2);
 #endif
 
 #if TEST_MODEL_LOAD
