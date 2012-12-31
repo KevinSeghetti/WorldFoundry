@@ -12,6 +12,8 @@
 # makefile in some ways.  I think the pros out do the cons.
 # NOTE, still also add to DIR_LIST, as a couple of targets still use it.
 
+include ../GNUMakefile.env
+
 ifndef WF_TARGET
 	WF_TARGET = linux
 endif
