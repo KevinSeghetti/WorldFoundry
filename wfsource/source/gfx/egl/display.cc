@@ -460,27 +460,27 @@ Display::PageFlip()
 //     { 0, 1, 0 },
 //     { 0, 0, 1 }
 //  };
-    GLfloat mat[16], rot[16], scale[16];
+//    GLfloat mat[16], rot[16], scale[16];
 
     /* Set modelview/projection matrix */
-    make_z_rot_matrix(view_rotx, rot);
-    make_scale_matrix(0.5, 0.5, 0.5, scale);
-    mul_matrix(mat, rot, scale);
+//  make_z_rot_matrix(view_rotx, rot);
+//  make_scale_matrix(0.25, 0.25, 0.25, scale);
+//  mul_matrix(mat, rot, scale);
+//
+//
+//std::cout << "orig matrix = " <<std::endl;
+//for(int y=0;y<4;y++)
+//{
+//    std::cout << "  ";
+//    for(int x=0;x<4;x++)
+//    {
+//        std::cout << mat[(y*4)+x] << " ";
+//    }
+//    std::cout << std::endl;
+//}
 
 
-//  std::cout << "orig matrix = " <<std::endl;
-//  for(int y=0;y<4;y++)
-//  {
-//      std::cout << "  ";
-//      for(int x=0;x<4;x++)
-//      {
-//          std::cout << mat[(y*4)+x] << " ";
-//      }
-//      std::cout << std::endl;
-//  }
-
-
-    glUniformMatrix4fv(u_matrix, 1, GL_FALSE, mat);
+    //glUniformMatrix4fv(u_matrix, 1, GL_FALSE, mat);
 
  //   view_rotx += 5.0;
 
