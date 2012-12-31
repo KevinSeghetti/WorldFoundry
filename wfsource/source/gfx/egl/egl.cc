@@ -79,55 +79,55 @@ static GLfloat view_rotx = 0.0, view_roty = 0.0;
 static GLint u_matrix = -1;
 static GLint attr_pos = 0, attr_color = 1;
 
-static void
-make_z_rot_matrix(GLfloat angle, GLfloat *m)
-{
-   float c = cos(angle * M_PI / 180.0);
-   float s = sin(angle * M_PI / 180.0);
-   int i;
-   for (i = 0; i < 16; i++)
-      m[i] = 0.0;
-   m[0] = m[5] = m[10] = m[15] = 1.0;
-
-   m[0] = c;
-   m[1] = s;
-   m[4] = -s;
-   m[5] = c;
-}
-
-static void
-make_scale_matrix(GLfloat xs, GLfloat ys, GLfloat zs, GLfloat *m)
-{
-   int i;
-   for (i = 0; i < 16; i++)
-      m[i] = 0.0;
-   m[0] = xs;
-   m[5] = ys;
-   m[10] = zs;
-   m[15] = 1.0;
-}
-
-
-static void
-mul_matrix(GLfloat *prod, const GLfloat *a, const GLfloat *b)
-{
-#define A(row,col)  a[(col<<2)+row]
-#define B(row,col)  b[(col<<2)+row]
-#define P(row,col)  p[(col<<2)+row]
-   GLfloat p[16];
-   GLint i;
-   for (i = 0; i < 4; i++) {
-      const GLfloat ai0=A(i,0),  ai1=A(i,1),  ai2=A(i,2),  ai3=A(i,3);
-      P(i,0) = ai0 * B(0,0) + ai1 * B(1,0) + ai2 * B(2,0) + ai3 * B(3,0);
-      P(i,1) = ai0 * B(0,1) + ai1 * B(1,1) + ai2 * B(2,1) + ai3 * B(3,1);
-      P(i,2) = ai0 * B(0,2) + ai1 * B(1,2) + ai2 * B(2,2) + ai3 * B(3,2);
-      P(i,3) = ai0 * B(0,3) + ai1 * B(1,3) + ai2 * B(2,3) + ai3 * B(3,3);
-   }
-   memcpy(prod, p, sizeof(p));
-#undef A
-#undef B
-#undef PROD
-}
+//static void
+//make_z_rot_matrix(GLfloat angle, GLfloat *m)
+//{
+//   float c = cos(angle * M_PI / 180.0);
+//   float s = sin(angle * M_PI / 180.0);
+//   int i;
+//   for (i = 0; i < 16; i++)
+//      m[i] = 0.0;
+//   m[0] = m[5] = m[10] = m[15] = 1.0;
+//
+//   m[0] = c;
+//   m[1] = s;
+//   m[4] = -s;
+//   m[5] = c;
+//}
+//
+//static void
+//make_scale_matrix(GLfloat xs, GLfloat ys, GLfloat zs, GLfloat *m)
+//{
+//   int i;
+//   for (i = 0; i < 16; i++)
+//      m[i] = 0.0;
+//   m[0] = xs;
+//   m[5] = ys;
+//   m[10] = zs;
+//   m[15] = 1.0;
+//}
+//
+//
+//static void
+//mul_matrix(GLfloat *prod, const GLfloat *a, const GLfloat *b)
+//{
+//#define A(row,col)  a[(col<<2)+row]
+//#define B(row,col)  b[(col<<2)+row]
+//#define P(row,col)  p[(col<<2)+row]
+//   GLfloat p[16];
+//   GLint i;
+//   for (i = 0; i < 4; i++) {
+//      const GLfloat ai0=A(i,0),  ai1=A(i,1),  ai2=A(i,2),  ai3=A(i,3);
+//      P(i,0) = ai0 * B(0,0) + ai1 * B(1,0) + ai2 * B(2,0) + ai3 * B(3,0);
+//      P(i,1) = ai0 * B(0,1) + ai1 * B(1,1) + ai2 * B(2,1) + ai3 * B(3,1);
+//      P(i,2) = ai0 * B(0,2) + ai1 * B(1,2) + ai2 * B(2,2) + ai3 * B(3,2);
+//      P(i,3) = ai0 * B(0,3) + ai1 * B(1,3) + ai2 * B(2,3) + ai3 * B(3,3);
+//   }
+//   memcpy(prod, p, sizeof(p));
+//#undef A
+//#undef B
+//#undef PROD
+//}
 
 /* new window size or exposure */
 static void
@@ -152,7 +152,15 @@ create_shaders(void)
       "varying vec4 v_color;\n"
       "void main() {\n"
       "   gl_Position = modelviewProjection * pos;\n"
+      "   float clippedZ = clamp(gl_Position.z,0.0,127.0);"
+      "   float hsz = 110.0/clippedZ;"
+      "   hsz = clamp(hsz,-512.0,512.0);"
+      "   gl_Position.x *= hsz;"
+      "   gl_Position.y *= hsz;" 
+      "   gl_Position.x *= 0.01;"
+      "   gl_Position.y *= 0.01;" 
       "   v_color = color;\n"
+      "   gl_Position.z = clamp(gl_Position.z,0.1,0.9);\n"
       "}\n";
 
    GLuint fragShader, vertShader, program;
@@ -164,6 +172,15 @@ create_shaders(void)
    glGetShaderiv(fragShader, GL_COMPILE_STATUS, &stat);
    if (!stat) {
       printf("Error: fragment shader did not compile!\n");
+#define LOG_LENGTH 5000
+
+      char infoLog[LOG_LENGTH+1];
+      int length;
+      glGetShaderInfoLog(fragShader,LOG_LENGTH,&length,infoLog);
+      infoLog[length]=0;
+      printf("log = \n");
+      printf("%s\n",infoLog);
+
       exit(1);
    }
 
@@ -172,7 +189,13 @@ create_shaders(void)
    glCompileShader(vertShader);
    glGetShaderiv(vertShader, GL_COMPILE_STATUS, &stat);
    if (!stat) {
+      char infoLog[LOG_LENGTH+1];
+      int length;
+      glGetShaderInfoLog(vertShader,LOG_LENGTH,&length,infoLog);
+      infoLog[length]=0;
       printf("Error: vertex shader did not compile!\n");
+      printf("log = \n");
+      printf("%s\n",infoLog);
       exit(1);
    }
 
@@ -243,7 +266,7 @@ make_x_window(XDisplay *x_dpy, EGLDisplay egl_dpy,
       EGL_RED_SIZE, 1,
       EGL_GREEN_SIZE, 1,
       EGL_BLUE_SIZE, 1,
-      EGL_DEPTH_SIZE, 1,
+      EGL_DEPTH_SIZE, 16,
       EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
       EGL_NONE
    };
