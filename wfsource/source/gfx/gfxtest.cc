@@ -48,8 +48,8 @@
 #define TEST_MODEL_LOAD 0
 #define ANIMATE_MATERIAL 0
 #define ANIMATE_VERTEX 0
-#define ANIMATE_POSITION 0
-#define ANIMATE_ROTATION 0 
+#define ANIMATE_POSITION 1
+#define ANIMATE_ROTATION 1 
 
 #if TEST_MODEL_LOAD
 #if !DO_DEBUG_FILE_SYSTEM
@@ -427,8 +427,7 @@ GFXTester::GFXTester() :
 #endif
 	vp(display,4000,Scalar( 320, 0 ), Scalar( 240, 0 ), testMemory, 2 )
 #if TEST_3D
-	//,position3D(SCALAR_CONSTANT(-5),SCALAR_CONSTANT(0),SCALAR_CONSTANT(ZMAXLIMIT)),
-	,position3D(SCALAR_CONSTANT(0),SCALAR_CONSTANT(0),SCALAR_CONSTANT(0)),
+	,position3D(SCALAR_CONSTANT(-5),SCALAR_CONSTANT(0),SCALAR_CONSTANT(ZMAXLIMIT)),
 	delta3D(SCALAR_CONSTANT(0.1*speed),SCALAR_CONSTANT(0.1333*speed),SCALAR_CONSTANT(0.3*speed)),
 	rot3D(Angle::zero,Angle::zero, Angle::zero),
 	deltaRot3D(Angle::Degree(SCALAR_CONSTANT(4*speed)),Angle::Degree(SCALAR_CONSTANT(5*speed)),Angle::Degree(SCALAR_CONSTANT(0))),
@@ -700,7 +699,7 @@ GFXTester::Render()
 		camera.RenderObject(*object3D,mat);
 
 		Matrix34 mat2(rot3D2,position3D2);
-		//camera.RenderObject(*object3D2,mat2);
+		camera.RenderObject(*object3D2,mat2);
 #endif
 
 #if TEST_MODEL_LOAD
