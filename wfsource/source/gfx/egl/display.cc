@@ -64,14 +64,14 @@ int wfWindowHeight = 480;
 
 extern void XEventLoop();
 
+#if defined(USE_ORDER_TABLES)
+#error order tables not supported in egl (no reason for them)
+#endif									// defined(USE_ORDER_TABLES)
+
 //==============================================================================
 
 Display::Display(int orderTableSize, int xPos, int yPos, int xSize, int ySize, Memory& memory,bool /*interlace*/) :
 _drawPage(0),
-#if defined(USE_ORDER_TABLES)
-_constructionOrderTableIndex(0),
-_renderOrderTableIndex(1),
-#endif
 _xPos(xPos),
 _yPos(yPos),
 _xSize(xSize),
@@ -86,26 +86,6 @@ _memory(memory)
         sys_exit(1);
     }
 
-//  while (1) {
-//      event_loop(halDisplay.mainDisplay, halDisplay.win, halDisplay.eglDisplay, halDisplay.eglSurface);
-//  }
-
-//    AssertGLOK();
-//
-//   WFInitGL();
-//
-//    assert(orderTableSize > 0);
-//#if defined(USE_ORDER_TABLES)
-//    for(int index=0;index<ORDER_TABLES;index++)
-//    {
-//        _orderTable[index] = new (_memory) OrderTable(orderTableSize,_memory);
-//        assert(ValidPtr(_orderTable[index]));
-//    }
-//#endif
-
-    // set up GL 
-   //glLightModelf(GL_LIGHT_MODEL_TWO_SIDE,1);
-   //glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
     _drawPage = 0;
     ResetTime();
@@ -146,11 +126,6 @@ Display::~Display()
         PageFlip();
 
     PageFlip();
-
-#if defined(USE_ORDER_TABLES)
-    for(int index=ORDER_TABLES-1;index>= 0;index--)
-        _memory.Free(_orderTable[index],sizeof(OrderTable));
-#endif
 
 #if defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)
     delete _videoMemory;
@@ -208,100 +183,11 @@ Display::RenderBegin()
    AssertGLOK();
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);     // Clear the window with current clearing color
    AssertGLOK();
-#if defined(RENDERER_PIPELINE_GL)
-   glEnable(GL_LIGHTING);
-   glEnable(GL_LIGHT0);
-   glEnable(GL_LIGHT1);
-   glEnable(GL_LIGHT2);
-   glEnable(GL_NORMALIZE);
-   glEnable(GL_FOG);
-
-   GLfloat lightWhite[] = {
-       1.0, 1.0, 1.0, 1.0
-   };
-
-
-   GLfloat lightBlack[] = {
-       0.0, 0.0, 0.0, 0.0
-   };
-   glMaterialfv(GL_FRONT,GL_AMBIENT,lightWhite);
-   glMaterialfv(GL_FRONT,GL_DIFFUSE,lightWhite);
-   glMaterialfv(GL_FRONT,GL_SPECULAR,lightBlack);
-   AssertGLOK();
-#elif defined(RENDERER_PIPELINE_GLES)
-// glEnable(GL_LIGHTING);
-// glEnable(GL_LIGHT0);
-// glEnable(GL_LIGHT1);
-// glEnable(GL_LIGHT2);
-// glEnable(GL_NORMALIZE);
-// glEnable(GL_FOG);
-//
-// GLfloat lightWhite[] = {
-//     1.0, 1.0, 1.0, 1.0
-// };
-//
-//
-// GLfloat lightBlack[] = {
-//     0.0, 0.0, 0.0, 0.0
-// };
-// glMaterialfv(GL_FRONT,GL_AMBIENT,lightWhite);
-// glMaterialfv(GL_FRONT,GL_DIFFUSE,lightWhite);
-// glMaterialfv(GL_FRONT,GL_SPECULAR,lightBlack);
-// AssertGLOK();
-
-#else
-   glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-   glDisable(GL_LIGHTING);
+#if !defined(RENDERER_PIPELINE_GLES)
+# error WTF? 
 #endif
-
+   // kts does this do anything? 
    AssertGLOK();
-   //glEnable( GL_TEXTURE_2D );
-   AssertGLOK();
-
-#if 0
-   static GLfloat cameraZ = -5.0;
-   static GLfloat zOffset = 0;
-   //cameraZ += 0.1;
-   //zOffset += 0.1;
-   //cout << "cz: " << cameraZ << ", zo:" << zOffset << endl;
-
-   glMatrixMode (GL_MODELVIEW);
-   glLoadIdentity();
-   //glTranslatef(0.0,0.0,cameraZ);
-
-    glDisable(GL_BLEND);
-    glDisable(GL_POLYGON_SMOOTH);
-
-   GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-   GLfloat mat_shininess[] = { 50.0 };
-   GLfloat light_position[] = { 1.0,1.0,1.0,1.0 };
-   GLfloat white_light[] = { 1.0,1.0,1.0,1.0 };
-   GLfloat mat_ambient_color[] = { 0.8,0.8,0.2,1.0 };
-   GLfloat mat_diffuse[] = { 0.1,0.5, 0.8, 1.0 };
-   glClearColor(0.0,0.0,0.0,0.0);
-   glShadeModel(GL_SMOOTH);
-   glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
-   glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-   glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-   glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
-   glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
-   glEnable(GL_LIGHTING);
-   glEnable(GL_LIGHT0);
-   glEnable(GL_DEPTH_TEST);
-
-    glBegin(GL_TRIANGLES);
-    glColor3f(1.0, 1.0, 1.0);
-    glVertex3f( 0.9, -0.9, -10.0 + zOffset);
-    glVertex3f( 0.9,  0.9, -10.0 + zOffset);
-    glVertex3f(-0.9,  0.0, -10.0 + zOffset);
-    glColor3f(0.0, 1.0, 0.0);
-    glVertex3f(-0.9, -0.9, -20.0 + zOffset);
-    glVertex3f(-0.9,  0.9, -20.0 + zOffset);
-    glVertex3f( 0.9,  0.0, -5.0 + zOffset);
-    glEnd();
-#endif
-    //glLoadIdentity ();
 }
 
 //==============================================================================
@@ -360,7 +246,7 @@ Display::PageFlip()
 	}
 #endif
 #if defined(__LINUX__)
-    XEventLoop(); 
+    //XEventLoop(); 
 #endif
 
     Validate();
@@ -390,65 +276,6 @@ Display::PageFlip()
     AssertGLOK();
         // end test code
 #endif
-
-#if defined(RENDERER_PIPELINE_SOFTWARE)
-#if defined(USE_ORDER_TABLES)
-    SetConstructionOrderTableIndex(_drawPage);
-    SetRenderOrderTableIndex(1-_drawPage);
-
-    _orderTable[GetRenderOrderTableIndex()]->Render();
-    _drawPage ^= 1;
-    _orderTable[GetConstructionOrderTableIndex()]->Clear();
-#else // USE_ORDER_TABLES
-#error now what?
-    assert(0);
-#endif
-#elif defined(RENDERER_PIPELINE_GL) // defined(RENDERER_PIPELINE_SOFTWARE)
-
-#if 0
-    static float xRot;
-    xRot += 1.0f;
-    static float yRot;
-    yRot += 1.0f;
-    glPushMatrix();
-    AssertGLOK();
-    glRotatef(xRot,1.0f,0.0f,0.0f);
-    AssertGLOK();
-    glRotatef(yRot,0.0f,1.0f,0.0f);
-    AssertGLOK();
-
-    GLfloat x,y,z,angle;
-    glClearColor(0.0f, 0.0f,0.0f,1.0f);
-    AssertGLOK();
-    glColor3f(0.0f,1.0f,0.0f);
-    AssertGLOK();
-
-    glClear(GL_COLOR_BUFFER_BIT);
-    AssertGLOK();
-    glDisable( GL_TEXTURE_2D );
-    AssertGLOK();
-    glBegin(GL_TRIANGLES);
-
-    glColor3ub( 128, 128, 0 );
-    z = -50.0f;
-    for(angle=0.0f; angle <= (2.0f*3.1415)*3.0f; angle += 0.1f)
-    {
-        x = 50.0f*sin(angle);
-        y = 50.0f*cos(angle);
-        glVertex3f(0.0f+200.0f,0.0f,0.0f);
-        glVertex3f(x+200.0f,y,z);
-        x = 50.0f*sin(angle+10.0);
-        y = 50.0f*cos(angle+10.0);
-        glVertex3f(x+200.0f,y,z);
-        z += 0.5f;
-    }
-    glEnd();
-    AssertGLOK();
-    glPopMatrix();
-
-#endif // 0
-
-#elif defined(RENDERER_PIPELINE_GLES) 
 
 //  static const GLfloat verts[3][2] = {
 //     { -1, -1 },
@@ -496,12 +323,33 @@ Display::PageFlip()
  //    glDisableVertexAttribArray(attr_color);
  // }
 
+    view_roty += 0.1;
+    //gears_idle();
+    //gears_draw();
+
+    // switch back to our program
+//  glUseProgram(wfProgram);
+//
+//     /* test setting attrib locations */
+//     glBindAttribLocation(wfProgram, attr_pos, "pos");
+//     glBindAttribLocation(wfProgram, attr_color, "color");
+//     glLinkProgram(wfProgram);  /* needed to put attribs into effect */
+
+
+
     AssertGLOK();
-    eglSwapBuffers(halDisplay.eglDisplay, halDisplay.eglSurface);
+    //eglSwapBuffers(halDisplay.eglDisplay, halDisplay.eglSurface);
+
+
+    //while (1) {
+        struct eglut_window *win = _eglut->current;
+        next_event(win);
+        gears_draw();          
+        eglSwapBuffers(_eglut->dpy, win->surface);
+    //}
+
+
     AssertGLOK();
-#else
-#error renderer pipeline not defined!
-#endif
 
     glFlush();
     AssertGLOK();
@@ -582,12 +430,6 @@ Display::PageFlip()
 #endif
 
 }
-
-//============================================================================
-
-#if defined(USE_ORDER_TABLES)
-#error order tables not supported in egl (no reason for them)
-#endif									// defined(USE_ORDER_TABLES)
 
 //==============================================================================
 
