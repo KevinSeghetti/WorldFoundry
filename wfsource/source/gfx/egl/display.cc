@@ -246,7 +246,7 @@ Display::PageFlip()
 	}
 #endif
 #if defined(__LINUX__)
-    //XEventLoop(); 
+   XEventLoop(); 
 #endif
 
     Validate();
@@ -309,8 +309,6 @@ Display::PageFlip()
 
     //glUniformMatrix4fv(u_matrix, 1, GL_FALSE, mat);
 
- //   view_rotx += 5.0;
-
  // {
  //    glVertexAttribPointer(attr_pos, 2, GL_FLOAT, GL_FALSE, 0, verts);
  //    glVertexAttribPointer(attr_color, 3, GL_FLOAT, GL_FALSE, 0, colors);
@@ -323,42 +321,25 @@ Display::PageFlip()
  //    glDisableVertexAttribArray(attr_color);
  // }
 
-    view_roty += 0.1;
-    //gears_idle();
-    //gears_draw();
-
     // switch back to our program
-//  glUseProgram(wfProgram);
+//  glUseProgram(halDisplay.wfProgram);
 //
 //     /* test setting attrib locations */
-//     glBindAttribLocation(wfProgram, attr_pos, "pos");
-//     glBindAttribLocation(wfProgram, attr_color, "color");
-//     glLinkProgram(wfProgram);  /* needed to put attribs into effect */
-
-
+//     glBindAttribLocation(halDisplay.wfProgram, attr_pos, "pos");
+//     glBindAttribLocation(halDisplay.wfProgram, attr_color, "color");
+//     glLinkProgram(halDisplay.wfProgram);  /* needed to put attribs into effect */
 
     AssertGLOK();
-    //eglSwapBuffers(halDisplay.eglDisplay, halDisplay.eglSurface);
-
-
-    //while (1) {
-        struct eglut_window *win = _eglut->current;
-        next_event(win);
-        gears_draw();          
-        eglSwapBuffers(_eglut->dpy, win->surface);
-    //}
-
-
-    AssertGLOK();
-
+    
     glFlush();
     AssertGLOK();
 
 #if defined(__WIN__)
     // Call function to swap the buffers
-	SwapBuffers(hDC);					// Swap Buffers (Double Buffering)
+	 SwapBuffers(hDC);					// Swap Buffers (Double Buffering)
 #elif defined(__LINUX__)
-    //glXSwapBuffers(halDisplay.mainDisplay, halDisplay.win);
+    eglSwapBuffers(halDisplay.eglDisplay, halDisplay.current->surface);
+    //glXSwapBuffers(halDisplay.eglDisplay, halDisplay.win);
     AssertGLOK();
 
          // glFinish();
@@ -471,6 +452,7 @@ LoadGLMatrixFromMatrix34(const Matrix34& matrix)
         }
         std::cout << std::endl;
     }
+
     glUniformMatrix4fv(u_matrix, 1, GL_FALSE, mat);
     AssertGLOK();
 }
@@ -496,8 +478,9 @@ void ProcessXEvents(XEvent event)
     {
         case ConfigureNotify: 
             {
-
-                reshape(event.xconfigure.width, event.xconfigure.height);
+                halDisplay.current->native.width = event.xconfigure.width;
+                halDisplay.current->native.height = event.xconfigure.height;
+                WindowReshape(halDisplay.current->native.width, halDisplay.current->native.height);
 //
 //
 //              /* this approach preserves a 1:1 viewport aspect ratio */
@@ -522,7 +505,10 @@ void ProcessXEvents(XEvent event)
 
         case KeyPress:
             // printf("key %x pressed\n",key);
+
+            // world foundry key handling
             key = XLookupKeysym(&event.xkey, 0);
+
             switch(key)
             {
                 case(XK_KP_4):
@@ -722,20 +708,22 @@ void ProcessXEvents(XEvent event)
 
 //==============================================================================
 
-void XEventLoop()
+void
+XEventLoop()
 {
+    struct eglut_window *win = halDisplay.current;
+
     XEvent xev;
     int num_events;
-
-    XFlush(halDisplay.mainDisplay);
-    num_events = XPending(halDisplay.mainDisplay);
+  
+    num_events = XPending(halDisplay.native_dpy);
     while((num_events != 0))
     {
         num_events--;
-        XNextEvent(halDisplay.mainDisplay, &xev);
+        XNextEvent(halDisplay.native_dpy, &xev);
         ProcessXEvents(xev);
     }
-
+  
     // printf("_joystickButtons = %x\n", _joystickButtons);
 }
 
