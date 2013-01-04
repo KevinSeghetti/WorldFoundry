@@ -71,7 +71,30 @@ void LoadGLMatrixFromMatrix34(const Matrix34& matrix);
 #endif
 
 #if defined(RENDERER_EGL)
-// kts temp
+
+#include <GLES2/gl2.h>  /* use OpenGL ES 2.x */
+
+struct HalDisplay
+{
+    EGLDisplay eglDisplay;
+    EGLNativeDisplayType native_dpy;
+
+    EGLDisplay dpy;
+    EGLint major, minor;
+
+    struct eglut_window *current;
+
+   GLuint wfProgram;
+   GLint attr_pos;
+   GLint attr_color;
+   GLint u_matrix;
+   GLint s_texture;
+   GLint u_textured;
+   GLint a_texCoord;
+};
+
+extern HalDisplay halDisplay;
+
 void LoadGLMatrixFromMatrix34(const Matrix34& matrix);
 #endif
 
