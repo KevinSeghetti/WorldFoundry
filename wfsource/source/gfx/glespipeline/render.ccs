@@ -79,19 +79,20 @@ SetTexture(const PixelMap& texturePixelMap)
 }
 
 static void 
-CalcAndSetUV(unsigned short tpage, unsigned char uin, unsigned char vin, const PixelMap& texturePixelMap) 
+CalcAndSetUV(unsigned short tpage, unsigned char uin, unsigned char vin, const PixelMap& texturePixelMap, float* texCoords) 
 {
-//    ulong u(uin+DecodeTPageX(tpage));
-//    ulong v(vin+DecodeTPageY(tpage));
-//
-//#if defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)
-//    float uResult(float(u)/VRAM_WIDTHF);
-//    float vResult(float(v)/VRAM_HEIGHTF);
-//#else
-//    float uResult(float(u)/texturePixelMap.GetBaseXSize());
-//    float vResult(float(v)/texturePixelMap.GetBaseYSize());
-//#endif
-//    glTexCoord2f(uResult, vResult);
+    ulong u(uin+DecodeTPageX(tpage));
+    ulong v(vin+DecodeTPageY(tpage));
+
+#if defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)
+    float uResult(float(u)/VRAM_WIDTHF);
+    float vResult(float(v)/VRAM_HEIGHTF);
+#else
+    float uResult(float(u)/texturePixelMap.GetBaseXSize());
+    float vResult(float(v)/texturePixelMap.GetBaseYSize());
+#endif
+    texCoords[0] = uResult;
+    texCoords[1] = vResult;
 }
 
 //-----------------------------------------------------------------------------
@@ -103,6 +104,7 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
 
    AssertGLOK();
    float color[3][4];
+   float texCoords[3][2];
    color[0][3] = 1.0;
    color[1][3] = 1.0;
    color[2][3] = 1.0;
@@ -130,11 +132,9 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
 //   const Vector3_PS& glnormal = (globalRendererVariables.currentRenderFace->normal);
 //   glNormal3f(glnormal.X().AsFloat(),glnormal.Y().AsFloat(),glnormal.Z().AsFloat());
 //
-   GLint attr_pos = 0, attr_color = 1;
-
 //   glUseProgram(halDisplay.wfProgram);
    glBindBuffer(GL_ARRAY_BUFFER, 0);         // unbind any existing bindng
-   glVertexAttribPointer(attr_pos, 3, GL_FIXED, GL_FALSE, 0, reinterpret_cast<const GLfixed **>(globalRendererVariables.gteVect));
+   glVertexAttribPointer(halDisplay.attr_pos, 3, GL_FIXED, GL_FALSE, 0, reinterpret_cast<const GLfixed **>(globalRendererVariables.gteVect));
 
    color[0][0] = float(poly.r0)/256.0;
    color[0][1] = float(poly.g0)/256.0;
@@ -143,9 +143,13 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
    AssertGLOK();
 
 #if FLAG_TEXTURE == 0
+   glUniform1i(halDisplay.u_textured, 0);
+   AssertGLOK();
 #if FLAG_GOURAUD == 0
 //   // f3
-   glVertexAttrib3fv(attr_color, &color[0][0]);
+   glVertexAttrib3fv(halDisplay.attr_color, &color[0][0]);
+   AssertGLOK();
+
 // 
 //   //glColor3ub( poly.r0, poly.g0, poly.b0 );
 //   color[0] = float(poly.r0)/256.0;
@@ -165,7 +169,8 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
    color[2][0] = float(poly.r2)/256.0;
    color[2][1] = float(poly.g2)/256.0;
    color[2][2] = float(poly.b2)/256.0;
-   glVertexAttribPointer(attr_color, 3, GL_FLOAT, GL_FALSE, 0, color);
+   glVertexAttribPointer(halDisplay.attr_color, 3, GL_FLOAT, GL_FALSE, 0, color);
+   AssertGLOK();
 
 // 
 //   color[0] = float(poly.r0)/256.0;
@@ -189,11 +194,24 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
 
 #endif
 #else         // FLAG_TEXTURE
+   glUniform1i(halDisplay.u_textured, 1);
+   AssertGLOK();
 //
    assert(poly.pPixelMap);
+
+   CalcAndSetUV(poly.tpage, poly.u0,poly.v0,*poly.pPixelMap,&texCoords[0][0]);
+   CalcAndSetUV(poly.tpage, poly.u1,poly.v1,*poly.pPixelMap,&texCoords[1][0]);
+   CalcAndSetUV(poly.tpage, poly.u2,poly.v2,*poly.pPixelMap,&texCoords[2][0]);
+
+ glVertexAttribPointer(halDisplay.a_texCoord, 3, GL_FLOAT, GL_FALSE, 0, texCoords);
+ AssertGLOK();
+ glEnableVertexAttribArray(halDisplay.a_texCoord);
+ AssertGLOK();
+
 #if FLAG_GOURAUD == 0
    //ft3
-   glVertexAttrib3fv(attr_color, &color[0][0]);
+   glVertexAttrib3fv(halDisplay.attr_color, &color[0][0]);
+   AssertGLOK();
 ////            glColor3ub( 255, 0, 0 );
 //   color[0] = float(poly.r0)/256.0;
 //   color[1] = float(poly.g0)/256.0;
@@ -205,12 +223,6 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
 //   color[2] = 1.0;
 //   glMaterialfv(GL_FRONT, GL_AMBIENT, color);
 //   glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
-//   CalcAndSetUV(poly.tpage, poly.u0,poly.v0,*poly.pPixelMap);
-//   GL_3D_VERTEX(globalRendererVariables.gteVect[0]);
-//   CalcAndSetUV(poly.tpage, poly.u1,poly.v1,*poly.pPixelMap);
-//   GL_3D_VERTEX(globalRendererVariables.gteVect[1]);
-//   CalcAndSetUV(poly.tpage, poly.u2,poly.v2,*poly.pPixelMap);
-//   GL_3D_VERTEX(globalRendererVariables.gteVect[2]);
 
 #else            // FLAG_GOURAUD
    // gt3
@@ -220,7 +232,8 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
    color[2][0] = float(poly.r2)/256.0;
    color[2][1] = float(poly.g2)/256.0;
    color[2][2] = float(poly.b2)/256.0;
-   glVertexAttribPointer(attr_color, 3, GL_FLOAT, GL_FALSE, 0, color);
+   glVertexAttribPointer(halDisplay.attr_color, 3, GL_FLOAT, GL_FALSE, 0, color);
+   AssertGLOK();
 
 //   CalcAndSetUV(poly.tpage, poly.u0,poly.v0,*poly.pPixelMap);
 //   color[0] = float(poly.r0)/256.0;
@@ -249,15 +262,16 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
 
    AssertGLOK();
 
-   glEnableVertexAttribArray(attr_pos);
-   glEnableVertexAttribArray(attr_color);
+   glEnableVertexAttribArray(halDisplay.attr_pos);
+   glEnableVertexAttribArray(halDisplay.attr_color);
    AssertGLOK();
 
    glDrawArrays(GL_TRIANGLES, 0, 3);
    AssertGLOK();
 
-   glDisableVertexAttribArray(attr_pos);
-   glDisableVertexAttribArray(attr_color);
+   glDisableVertexAttribArray(halDisplay.attr_pos);
+   glDisableVertexAttribArray(halDisplay.attr_color);
+   glDisableVertexAttribArray(halDisplay.a_texCoord);
    AssertGLOK();
 
 //
