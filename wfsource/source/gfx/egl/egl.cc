@@ -237,7 +237,7 @@ create_shaders(void)
       "void main() {\n"
       "   if(u_textured)\n"
       "   {\n"
-      "       gl_FragColor = texture2D(s_texture, v_texCoord);\n"
+      "       gl_FragColor = texture2D(s_texture, v_texCoord) * v_color;\n"
       "   }\n"
       "   else\n"
       "   {\n"
