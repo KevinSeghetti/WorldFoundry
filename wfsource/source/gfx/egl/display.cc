@@ -307,7 +307,7 @@ Display::PageFlip()
 //}
 
 
-    //glUniformMatrix4fv(u_matrix, 1, GL_FALSE, mat);
+    //glUniformMatrix4fv(halDisplay.u_matrix, 1, GL_FALSE, mat);
 
  // {
  //    glVertexAttribPointer(attr_pos, 2, GL_FLOAT, GL_FALSE, 0, verts);
@@ -453,7 +453,7 @@ LoadGLMatrixFromMatrix34(const Matrix34& matrix)
         std::cout << std::endl;
     }
 
-    glUniformMatrix4fv(u_matrix, 1, GL_FALSE, mat);
+    glUniformMatrix4fv(halDisplay.u_matrix, 1, GL_FALSE, mat);
     AssertGLOK();
 }
 
