@@ -71,11 +71,20 @@ PixelMap::PixelMap(int flags, int xSize, int ySize)
     _pixelBuffer = new GLubyte[xSize*ySize*4];
 #endif		                            // sixteen_bit
     ValidatePtr(_pixelBuffer);
-
-   AssertGLOK();
-    glGenTextures(1,&_glTextureName);
+    AssertGLOK();
+    // Use tightly packed data
+    glPixelStorei ( GL_UNPACK_ALIGNMENT, 1 );
+    
+    // Generate a texture object
+    glGenTextures ( 1, &_glTextureName );
     assert(_glTextureName);
-   AssertGLOK();
+    AssertGLOK();
+    
+    glActiveTexture ( GL_TEXTURE0 );
+    // Bind the texture object
+    glBindTexture ( GL_TEXTURE_2D, _glTextureName );
+
+    AssertGLOK();
 #endif
 
 
@@ -444,7 +453,6 @@ PixelMap::Load(const void* memory, int xOffset, int yOffset, int xSize, int ySiz
 #define TEXTURE_FORMAT GL_RGBA
 #endif
 
-
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         AssertGLOK();
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -459,6 +467,7 @@ PixelMap::Load(const void* memory, int xOffset, int yOffset, int xSize, int ySiz
         glEnable(GL_BLEND);
         AssertGLOK();
 #else /* GFX_ZBUFFER */
+#error Why? Depth buffer always available
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         AssertGLOK();
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -479,7 +488,6 @@ PixelMap::Load(const void* memory, int xOffset, int yOffset, int xSize, int ySiz
 //   AssertGLOK();
 
 //             delete [] foo;
-
 
         AssertGLOK();
     }
