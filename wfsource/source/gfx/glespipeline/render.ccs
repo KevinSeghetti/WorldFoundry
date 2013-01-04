@@ -196,14 +196,15 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
 #else         // FLAG_TEXTURE
    glUniform1i(halDisplay.u_textured, 1);
    AssertGLOK();
-//
-   assert(poly.pPixelMap);
 
+   // Set the sampler texture unit to 0
+   glUniform1i ( halDisplay.s_texture, 0 );
+   assert(poly.pPixelMap);
    CalcAndSetUV(poly.tpage, poly.u0,poly.v0,*poly.pPixelMap,&texCoords[0][0]);
    CalcAndSetUV(poly.tpage, poly.u1,poly.v1,*poly.pPixelMap,&texCoords[1][0]);
    CalcAndSetUV(poly.tpage, poly.u2,poly.v2,*poly.pPixelMap,&texCoords[2][0]);
 
- glVertexAttribPointer(halDisplay.a_texCoord, 3, GL_FLOAT, GL_FALSE, 0, texCoords);
+ glVertexAttribPointer(halDisplay.a_texCoord, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
  AssertGLOK();
  glEnableVertexAttribArray(halDisplay.a_texCoord);
  AssertGLOK();
