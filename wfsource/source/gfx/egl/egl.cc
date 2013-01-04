@@ -74,19 +74,6 @@ struct eglut_window {
 
 //==============================================================================
 
-struct HalDisplay
-{
-    EGLDisplay eglDisplay;
-    EGLNativeDisplayType native_dpy;
-
-    EGLDisplay dpy;
-    EGLint major, minor;
-
-    struct eglut_window *current;
-
-    GLuint wfProgram;
-};
-
 HalDisplay halDisplay;
 
 //===============================================================================
@@ -200,22 +187,33 @@ _eglutCreateWindow(const char *title, int x, int y, int w, int h)
 
 //===============================================================================
 
-static GLint u_matrix = -1;
-static GLint attr_pos = 0, attr_color = 1;
+void
+LinkShaderProgram(GLuint program)
+{
+   GLint stat;
+   glLinkProgram(program);
 
+   glGetProgramiv(program, GL_LINK_STATUS, &stat);
+   if (!stat) {
+      char log[1000];
+      GLsizei len;
+      glGetProgramInfoLog(program, 1000, &len, log);
+      printf("Error: linking:\n%s\n", log);
+      exit(1);
+   }
+}
+
+//===============================================================================
 
 static void
 create_shaders(void)
 {
-   static const char *fragShaderText =
-      "varying vec4 v_color;\n"
-      "void main() {\n"
-      "   gl_FragColor = v_color;\n"
-      "}\n";
    static const char *vertShaderText =
       "uniform mat4 modelviewProjection;\n"
       "attribute vec4 pos;\n"
       "attribute vec4 color;\n"
+      "attribute vec2 a_texCoord;\n"
+      "varying vec2 v_texCoord;\n"
       "varying vec4 v_color;\n"
       "void main() {\n"
       "   gl_Position = modelviewProjection * pos;\n"
@@ -228,6 +226,23 @@ create_shaders(void)
       "   gl_Position.y *= 0.01;" 
       "   v_color = color;\n"
       "   gl_Position.z = clamp(gl_Position.z,0.1,0.9);\n"
+      "   v_texCoord = a_texCoord;\n"
+      "}\n";
+
+   static const char *fragShaderText =
+      "uniform bool u_textured;                            \n"
+      "uniform sampler2D s_texture;                        \n"
+      "varying vec4 v_color;\n"
+      "varying vec2 v_texCoord;\n"
+      "void main() {\n"
+      "   if(u_textured)\n"
+      "   {\n"
+      "       gl_FragColor = texture2D(s_texture, v_texCoord);\n"
+      "   }\n"
+      "   else\n"
+      "   {\n"
+      "       gl_FragColor =  v_color;\n"
+      "   }\n"
       "}\n";
 
    GLuint fragShader, vertShader;
@@ -270,35 +285,50 @@ create_shaders(void)
    std::cout << "wfProgram = " << halDisplay.wfProgram << std::endl;
    glAttachShader(halDisplay.wfProgram, fragShader);
    glAttachShader(halDisplay.wfProgram, vertShader);
-   glLinkProgram(halDisplay.wfProgram);
-
-   glGetProgramiv(halDisplay.wfProgram, GL_LINK_STATUS, &stat);
-   if (!stat) {
-      char log[1000];
-      GLsizei len;
-      glGetProgramInfoLog(halDisplay.wfProgram, 1000, &len, log);
-      printf("Error: linking:\n%s\n", log);
-      exit(1);
-   }
+   LinkShaderProgram(halDisplay.wfProgram);
 
    glUseProgram(halDisplay.wfProgram);
+
+   halDisplay.attr_pos = 0;
+   halDisplay.attr_color = 1;
+   halDisplay.a_texCoord = 2;
+
    if (1) {
       /* test setting attrib locations */
-      glBindAttribLocation(halDisplay.wfProgram, attr_pos, "pos");
-      glBindAttribLocation(halDisplay.wfProgram, attr_color, "color");
-      glLinkProgram(halDisplay.wfProgram);  /* needed to put attribs into effect */
+      glBindAttribLocation(halDisplay.wfProgram, halDisplay.attr_pos, "pos");
+      glBindAttribLocation(halDisplay.wfProgram, halDisplay.attr_color, "color");
+      glBindAttribLocation(halDisplay.wfProgram, halDisplay.a_texCoord, "a_texCoord");
+      LinkShaderProgram(halDisplay.wfProgram); /* needed to put attribs into effect */
    }
    else {
       /* test automatic attrib locations */
-      attr_pos = glGetAttribLocation(halDisplay.wfProgram, "pos");
-      attr_color = glGetAttribLocation(halDisplay.wfProgram, "color");
+      halDisplay.attr_pos = glGetAttribLocation(halDisplay.wfProgram, "pos");
+      halDisplay.attr_color = glGetAttribLocation(halDisplay.wfProgram, "color");
    }
 
-   u_matrix = glGetUniformLocation(halDisplay.wfProgram, "modelviewProjection");
+   glGetProgramiv(halDisplay.wfProgram, GL_ACTIVE_ATTRIBUTES,&stat);
+   std::cout << "program stat: active attributes = " << stat << std::endl;
+   glGetProgramiv(halDisplay.wfProgram, GL_ACTIVE_UNIFORMS,&stat);
+   std::cout << "program stat: active uniforms = " << stat << std::endl;
+   glGetProgramiv(halDisplay.wfProgram, GL_VALIDATE_STATUS,&stat);
+   std::cout << "program stat: validate status = " << stat << std::endl;
 
-   printf("Uniform modelviewProjection at %d\n", u_matrix);
-   printf("Attrib pos at %d\n", attr_pos);
-   printf("Attrib color at %d\n", attr_color);
+   halDisplay.u_matrix = glGetUniformLocation(halDisplay.wfProgram, "modelviewProjection");
+   RangeCheck(0,halDisplay.u_matrix,128);
+
+   // Get the sampler locations
+   halDisplay.s_texture  = glGetUniformLocation(halDisplay.wfProgram,"s_texture");
+   RangeCheck(65536,halDisplay.s_texture,65536+128);
+
+   // get the bool location
+   halDisplay.u_textured  = glGetUniformLocation(halDisplay.wfProgram,"u_textured");
+   assertNe(0,halDisplay.u_textured);
+
+   printf("Uniform modelviewProjection at %d\n", halDisplay.u_matrix);
+   printf("Attrib pos at %d\n", halDisplay.attr_pos);
+   printf("Attrib color at %d\n", halDisplay.attr_color);
+   printf("s_texture at %d\n", halDisplay.s_texture);
+   printf("u_textured at %d\n", halDisplay.u_textured);
 }
 
 bool
