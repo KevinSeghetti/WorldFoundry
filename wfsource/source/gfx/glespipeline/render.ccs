@@ -39,6 +39,7 @@
 #include <math/scalarps.hp>
 #include <math/vector3.hp>
 #include <math/vector3p.hp>
+#include <gfx/display.hp>
 
 #include <cpplib/libstrm.hp>
 #include <gfx/prim.hp>
@@ -101,15 +102,17 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
    //std::cout << "RederObject3D:RenderPoly3D: " << primitive << std::endl;;
 
    AssertGLOK();
-//   float color[4];
-//   color[3] = 1.0;
+   float color[3][4];
+   color[0][3] = 1.0;
+   color[1][3] = 1.0;
+   color[2][3] = 1.0;
    assert(primitive);
    POLY_@+POLY_TYPE@+& poly = (*(POLY_@+POLY_TYPE@+*)primitive);
 
-   static const GLfloat colors[3][3] = {
-      { 1, 0, 0 },
-      { 0, 1, 0 },
-      { 0, 0, 1 }
+   static const GLfloat colors[3][4] = {
+      { 1, 0, 0, 1 },
+      { 0, 1, 0, 1 },
+      { 0, 0, 1, 1 }
    };
 
 //
@@ -129,9 +132,21 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
 //
    GLint attr_pos = 0, attr_color = 1;
 
+//   glUseProgram(halDisplay.wfProgram);
+   glBindBuffer(GL_ARRAY_BUFFER, 0);         // unbind any existing bindng
+   glVertexAttribPointer(attr_pos, 3, GL_FIXED, GL_FALSE, 0, reinterpret_cast<const GLfixed **>(globalRendererVariables.gteVect));
+
+   color[0][0] = float(poly.r0)/256.0;
+   color[0][1] = float(poly.g0)/256.0;
+   color[0][2] = float(poly.b0)/256.0;
+
+   AssertGLOK();
+
 #if FLAG_TEXTURE == 0
 #if FLAG_GOURAUD == 0
 //   // f3
+   glVertexAttrib3fv(attr_color, &color[0][0]);
+// 
 //   //glColor3ub( poly.r0, poly.g0, poly.b0 );
 //   color[0] = float(poly.r0)/256.0;
 //   color[1] = float(poly.g0)/256.0;
@@ -142,50 +157,17 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
 //   GL_3D_VERTEX(globalRendererVariables.gteVect[1]);
 //   GL_3D_VERTEX(globalRendererVariables.gteVect[2]);
 
-// glVertexAttribPointer(attr_pos, 3, GL_FIXED, GL_FALSE, 0, reinterpret_cast<const GLfixed **>(globalRendererVariables.gteVect));
-// AssertGLOK();
-// glVertexAttribPointer(attr_color, 3, GL_FLOAT, GL_FALSE, 0, colors);
-// AssertGLOK();
-// glEnableVertexAttribArray(attr_pos);
-// AssertGLOK();
-// glEnableVertexAttribArray(attr_color);
-// AssertGLOK();
-//
-// glDrawArrays(GL_TRIANGLES, 0, 3);
-// AssertGLOK();
-//
-// glDisableVertexAttribArray(attr_pos);
-// AssertGLOK();
-// glDisableVertexAttribArray(attr_color);
-// AssertGLOK();
-
-
-
-   GLfloat tmp[16];
-
-   memcpy(tmp, m, sizeof tmp);
-   translate(tmp, x, y, 0);
-   rotate(tmp, 2 * M_PI * angle / 360.0, 0, 0, 1);
-   glUniformMatrix4fv(proj_location, 1, GL_FALSE, tmp);
-   glUniform3fv(light_location, 1, light);
-   glUniform4fv(color_location, 1, color);
-
-   glBindBuffer(GL_ARRAY_BUFFER, gear->vbo);
-
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-			 6 * sizeof(GLfloat), NULL);
-   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-			 6 * sizeof(GLfloat), (GLfloat *) 0 + 3);
-   glEnableVertexAttribArray(0);
-   glEnableVertexAttribArray(1);
-   //glDrawArrays(GL_TRIANGLE_STRIP, 0, gear->count);
-   glDrawArrays(GL_TRIANGLES, 0, 3);
-
-
-
-
 #else       // FLAG_GOURAUD
 //   //g3
+   color[1][0] = float(poly.r1)/256.0;
+   color[1][1] = float(poly.g1)/256.0;
+   color[1][2] = float(poly.b1)/256.0;
+   color[2][0] = float(poly.r2)/256.0;
+   color[2][1] = float(poly.g2)/256.0;
+   color[2][2] = float(poly.b2)/256.0;
+   glVertexAttribPointer(attr_color, 3, GL_FLOAT, GL_FALSE, 0, color);
+
+// 
 //   color[0] = float(poly.r0)/256.0;
 //   color[1] = float(poly.g0)/256.0;
 //   color[2] = float(poly.b0)/256.0;
@@ -205,24 +187,13 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
 //   glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
 //   GL_3D_VERTEX(globalRendererVariables.gteVect[2]);
 
-
-// glVertexAttribPointer(attr_pos, 3, GL_FIXED, GL_FALSE, 0, reinterpret_cast<const GLfixed **>(globalRendererVariables.gteVect));
-// glVertexAttribPointer(attr_color, 3, GL_FLOAT, GL_FALSE, 0, colors);
-// glEnableVertexAttribArray(attr_pos);
-// glEnableVertexAttribArray(attr_color);
-//
-// glDrawArrays(GL_TRIANGLES, 0, 3);
-//
-// glDisableVertexAttribArray(attr_pos);
-// glDisableVertexAttribArray(attr_color);
-// AssertGLOK();
-
 #endif
 #else         // FLAG_TEXTURE
 //
    assert(poly.pPixelMap);
 #if FLAG_GOURAUD == 0
    //ft3
+   glVertexAttrib3fv(attr_color, &color[0][0]);
 ////            glColor3ub( 255, 0, 0 );
 //   color[0] = float(poly.r0)/256.0;
 //   color[1] = float(poly.g0)/256.0;
@@ -241,20 +212,16 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
 //   CalcAndSetUV(poly.tpage, poly.u2,poly.v2,*poly.pPixelMap);
 //   GL_3D_VERTEX(globalRendererVariables.gteVect[2]);
 
-
-// glVertexAttribPointer(attr_pos, 3, GL_FIXED, GL_FALSE, 0, reinterpret_cast<const GLfixed **>(globalRendererVariables.gteVect));
-// glVertexAttribPointer(attr_color, 3, GL_FLOAT, GL_FALSE, 0, colors);
-// glEnableVertexAttribArray(attr_pos);
-// glEnableVertexAttribArray(attr_color);
-//
-// glDrawArrays(GL_TRIANGLES, 0, 3);
-//
-// glDisableVertexAttribArray(attr_pos);
-// glDisableVertexAttribArray(attr_color);
-// AssertGLOK();
-
 #else            // FLAG_GOURAUD
    // gt3
+   color[1][0] = float(poly.r1)/256.0;
+   color[1][1] = float(poly.g1)/256.0;
+   color[1][2] = float(poly.b1)/256.0;
+   color[2][0] = float(poly.r2)/256.0;
+   color[2][1] = float(poly.g2)/256.0;
+   color[2][2] = float(poly.b2)/256.0;
+   glVertexAttribPointer(attr_color, 3, GL_FLOAT, GL_FALSE, 0, color);
+
 //   CalcAndSetUV(poly.tpage, poly.u0,poly.v0,*poly.pPixelMap);
 //   color[0] = float(poly.r0)/256.0;
 //   color[1] = float(poly.g0)/256.0;
@@ -277,20 +244,22 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
 //   glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
 //   GL_3D_VERTEX(globalRendererVariables.gteVect[2]);
 
-//
-// glVertexAttribPointer(attr_pos, 3, GL_FIXED, GL_FALSE, 0, reinterpret_cast<const GLfixed **>(globalRendererVariables.gteVect));
-// glVertexAttribPointer(attr_color, 3, GL_FLOAT, GL_FALSE, 0, colors);
-// glEnableVertexAttribArray(attr_pos);
-// glEnableVertexAttribArray(attr_color);
-//
-// glDrawArrays(GL_TRIANGLES, 0, 3);
-//
-// glDisableVertexAttribArray(attr_pos);
-// glDisableVertexAttribArray(attr_color);
-// AssertGLOK();
-
 #endif           // FLAG_GOURAUD
 #endif           // FLAG_TEXTURE
+
+   AssertGLOK();
+
+   glEnableVertexAttribArray(attr_pos);
+   glEnableVertexAttribArray(attr_color);
+   AssertGLOK();
+
+   glDrawArrays(GL_TRIANGLES, 0, 3);
+   AssertGLOK();
+
+   glDisableVertexAttribArray(attr_pos);
+   glDisableVertexAttribArray(attr_color);
+   AssertGLOK();
+
 //
 //   glEnd();
 //   AssertGLOK();
