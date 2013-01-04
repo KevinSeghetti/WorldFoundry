@@ -153,7 +153,7 @@ PixelMap::GetYPositionInVideoMemory() const		// only valid for video memory pixe
 
 //==============================================================================
 
-#if defined(RENDERER_GL) || defined(RENDERER_EGL)
+#if defined(RENDERER_GL)
 inline void
 PixelMap::SetGLTexture() const                 // make this pixelmap the current GL texture
 {
@@ -165,6 +165,29 @@ PixelMap::SetGLTexture() const                 // make this pixelmap the current
         _parent->SetGLTexture();
     else
         glBindTexture(GL_TEXTURE_2D,_glTextureName);
+    AssertGLOK();
+}
+
+#endif
+
+//===============================================================================
+
+#if defined(RENDERER_EGL)
+inline void
+PixelMap::SetGLTexture() const                 // make this pixelmap the current GL texture
+{
+    Validate();
+    //cout << "setGLTexture: glListIndex = " << _glListIndex << ",_parent = " << (void*)_parent << std::endl;
+
+    // kts this is incorrect, only like this for the transition, eventually will assert if has a parent
+    if(_parent)
+        _parent->SetGLTexture();
+    else
+    {
+        glActiveTexture ( GL_TEXTURE0 );
+        glBindTexture(GL_TEXTURE_2D,_glTextureName);
+    }
+
     AssertGLOK();
 }
 
