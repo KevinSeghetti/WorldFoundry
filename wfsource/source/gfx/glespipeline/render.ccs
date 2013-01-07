@@ -74,7 +74,7 @@ SetTexture(const PixelMap& texturePixelMap)
 {
 #if defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)
 #else
-//    texturePixelMap.SetGLTexture();
+    texturePixelMap.SetGLTexture();
 #endif
 }
 
