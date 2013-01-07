@@ -254,7 +254,6 @@ Display::RenderBegin()
    AssertGLOK();
    AssertMsg( _drawPage == 0 || _drawPage == 1, "_drawPage = " << _drawPage );
 
-   std::cout << char(0xc) << "RenderBegin" << std::endl;
    glClearColor( _backgroundColorRed, _backgroundColorGreen, _backgroundColorBlue, 1.0 );
    AssertGLOK();
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);     // Clear the window with current clearing color
@@ -517,9 +516,9 @@ void
 LoadGLMatrixFromMatrix34(const Matrix34& matrix)
 {
     AssertGLOK();
-    std::cout << "LoadGLMatrix: " << matrix << std::endl;
+    //std::cout << "LoadGLMatrix: " << matrix << std::endl;
     static GLfloat mat[16];
-#if 1
+
     mat[(0*4)+0] = matrix[0][0].AsFloat();
     mat[(0*4)+1] = matrix[0][1].AsFloat();
     mat[(0*4)+2] = matrix[0][2].AsFloat();
@@ -540,72 +539,19 @@ LoadGLMatrixFromMatrix34(const Matrix34& matrix)
     mat[(3*4)+2] = matrix[3][2].AsFloat();
     mat[(3*4)+3] = 1.0;
 
-#else
-    // flip from row major to column major order
-    mat[(0*4)+0] = matrix[0][0].AsFloat();
-    mat[(1*4)+0] = matrix[0][1].AsFloat();
-    mat[(2*4)+0] = matrix[0][2].AsFloat();
-    mat[(3*4)+0] = 0;
+    //std::cout << "LoadGLMatrixFrommatrix34: matrix = " << matrix << std::endl;
 
-    mat[(0*4)+1] = matrix[1][0].AsFloat();
-    mat[(1*4)+1] = matrix[1][1].AsFloat();
-    mat[(2*4)+1] = matrix[1][2].AsFloat();
-    mat[(3*4)+1] = 0;
-
-    mat[(0*4)+2] = -matrix[2][0].AsFloat();
-    mat[(1*4)+2] = -matrix[2][1].AsFloat();
-    mat[(2*4)+2] = -matrix[2][2].AsFloat();
-    mat[(3*4)+2] = 0;
-
-    mat[(0*4)+3] = matrix[3][0].AsFloat();
-    mat[(1*4)+3] = matrix[3][1].AsFloat();
-    mat[(2*4)+3] = matrix[3][2].AsFloat();
-    mat[(3*4)+3] = 1.0;
-
-#endif
-    std::cout << "LoadGLMatrixFrommatrix34: matrix = " << matrix << std::endl;
-
-    DumpMatrix("translated matrix",mat);
+    //DumpMatrix("translated matrix",mat);
     glUniformMatrix4fv(halDisplay.u_matrix, 1, GL_FALSE, mat);
     AssertGLOK();
 
 
-
     // multiply in projection matrix
-
-    GLfloat ar;
     GLfloat temp[16];
-    GLfloat m[16] = {
-       1.0, 0.0, 0.0, 0.0,
-       0.0, 1.0, 0.0, 0.0,
-       0.0, 0.0, 0.1, 0.0,
-       0.0, 0.0, 0.0, 1.0,
-    };
-
-//  GLfloat width = 200;
-//  GLfloat height = 200;
-//  if (width < height)
-//     ar = width;
-//  else
-//     ar = height;
-//
-//  // kts !!! this creates the project matrix
-//  m[0] = 0.1 * ar / width;
-//  m[5] = 0.1 * ar / height;
-//  //memcpy(proj, m, sizeof proj);
-
-//    DumpMatrix("test matrix",m);
-
-    //multiply(m,mat);
-  m[(3*4)+0] = matrix[3][0].AsFloat();
-  m[(3*4)+1] = matrix[3][1].AsFloat();
-  m[(3*4)+2] = matrix[3][2].AsFloat();
 
     memcpy(&temp[0],&halDisplay.perspectiveMatrix[0][0],sizeof(GLfloat)*16);
-
     multiply(temp,mat);
-
-    DumpMatrix("final matrix",temp);
+    //DumpMatrix("final matrix",temp);
 
     //glViewport(0, 0, (GLint) width, (GLint) height);
     glUniformMatrix4fv(halDisplay.u_matrix, 1, GL_FALSE, temp);
