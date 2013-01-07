@@ -376,7 +376,8 @@ InitWindow( int /*xPos*/, int /*yPos*/, int /*xSize*/, int /*ySize*/ )
 
 
 
-   glEnable(GL_CULL_FACE);
+#pragma kts TODO: fix GL version to have correct vertex ordering so we can enable face culling
+   //glEnable(GL_CULL_FACE);
    glEnable(GL_DEPTH_TEST);
 
 
