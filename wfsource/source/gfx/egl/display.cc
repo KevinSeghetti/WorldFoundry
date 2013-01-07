@@ -70,6 +70,67 @@ extern void XEventLoop();
 
 //==============================================================================
 
+
+void
+DumpMatrix(const char* title, GLfloat* mat)
+{
+    std::cout << title << " = " <<std::endl;
+    for(int row=0;row<4;row++)
+    {
+        std::cout << "  ";
+        for(int col=0;col<4;col++)
+        {
+            std::cout << mat[(col*4)+row] << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    for(int index=0;index<16;index++)
+    {
+        std::cout << mat[index] << " ";
+    }
+    std::cout << std::endl;
+}
+
+
+//==============================================================================
+// local copy of gluPerspective
+
+
+#define __glPi 3.14159265358979323846
+
+static void wf__gluMakeIdentityd(GLfloat m[16])
+{
+    m[0+4*0] = 1; m[0+4*1] = 0; m[0+4*2] = 0; m[0+4*3] = 0;
+    m[1+4*0] = 0; m[1+4*1] = 1; m[1+4*2] = 0; m[1+4*3] = 0;
+    m[2+4*0] = 0; m[2+4*1] = 0; m[2+4*2] = 1; m[2+4*3] = 0;
+    m[3+4*0] = 0; m[3+4*1] = 0; m[3+4*2] = 0; m[3+4*3] = 1;
+}
+
+void 
+wfgluPerspective(GLfloat m[4][4],GLfloat fovy, GLfloat aspect, GLfloat zNear, GLfloat zFar)
+{
+    float sine, cotangent, deltaZ;
+    float radians = fovy / 2 * __glPi / 180;
+
+    deltaZ = zFar - zNear;
+    sine = sin(radians);
+    if ((deltaZ == 0) || (sine == 0) || (aspect == 0)) {
+	return;
+    }
+    cotangent = cos(radians) / sine;
+
+    wf__gluMakeIdentityd(&m[0][0]);
+    m[0][0] = cotangent / aspect;
+    m[1][1] = cotangent;
+    m[2][2] = -(zFar + zNear) / deltaZ;
+    m[2][3] = -1;
+    m[3][2] = -2 * zNear * zFar / deltaZ;
+    m[3][3] = 0;
+}
+
+//===============================================================================
+
 Display::Display(int orderTableSize, int xPos, int yPos, int xSize, int ySize, Memory& memory,bool /*interlace*/) :
 _drawPage(0),
 _xPos(xPos),
@@ -86,9 +147,22 @@ _memory(memory)
         sys_exit(1);
     }
 
+    AssertGLOK();
+    //glDepthRangef(-0.5f, 1000.0f);
+    AssertGLOK();
 
     _drawPage = 0;
     ResetTime();
+
+
+    float fAspect = 1.0;                           // kts I am correcting for this elsewhere, eventually in the case of PIPELINE_GL this will need to be changed
+
+    //GLfloat m[4][4];
+    wfgluPerspective(halDisplay.perspectiveMatrix,60.0f,fAspect,1.0,1000.0f);
+    //glLoadMatrixf(	&m[0][0]);
+
+    DumpMatrix("perspective matrix",&halDisplay.perspectiveMatrix[0][0]);
+
 
 #if 0
 #pragma message ("KTS " __FILE__ ": temp test code")
@@ -179,6 +253,8 @@ Display::RenderBegin()
    Validate();
    AssertGLOK();
    AssertMsg( _drawPage == 0 || _drawPage == 1, "_drawPage = " << _drawPage );
+
+   std::cout << char(0xc) << "RenderBegin" << std::endl;
    glClearColor( _backgroundColorRed, _backgroundColorGreen, _backgroundColorBlue, 1.0 );
    AssertGLOK();
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);     // Clear the window with current clearing color
@@ -412,14 +488,38 @@ Display::PageFlip()
 
 }
 
+//===============================================================================
+#pragma message ("KTS " __FILE__ ": major kludge to get projection matrix. Update our matrix class to handle 4x4")
+
+
+static void
+multiply(GLfloat *m, const GLfloat *n)
+{
+   GLfloat tmp[16];
+   const GLfloat *row, *column;
+   div_t d;
+   int i, j;
+
+   for (i = 0; i < 16; i++) {
+      tmp[i] = 0;
+      d = div(i, 4);
+      row = n + d.quot * 4;
+      column = m + d.rem;
+      for (j = 0; j < 4; j++)
+	 tmp[i] += row[j] * column[j * 4];
+   }
+   memcpy(m, &tmp, sizeof tmp);
+}
+
 //==============================================================================
 
 void
 LoadGLMatrixFromMatrix34(const Matrix34& matrix)
 {
     AssertGLOK();
-
+    std::cout << "LoadGLMatrix: " << matrix << std::endl;
     static GLfloat mat[16];
+#if 1
     mat[(0*4)+0] = matrix[0][0].AsFloat();
     mat[(0*4)+1] = matrix[0][1].AsFloat();
     mat[(0*4)+2] = matrix[0][2].AsFloat();
@@ -440,20 +540,75 @@ LoadGLMatrixFromMatrix34(const Matrix34& matrix)
     mat[(3*4)+2] = matrix[3][2].AsFloat();
     mat[(3*4)+3] = 1.0;
 
+#else
+    // flip from row major to column major order
+    mat[(0*4)+0] = matrix[0][0].AsFloat();
+    mat[(1*4)+0] = matrix[0][1].AsFloat();
+    mat[(2*4)+0] = matrix[0][2].AsFloat();
+    mat[(3*4)+0] = 0;
+
+    mat[(0*4)+1] = matrix[1][0].AsFloat();
+    mat[(1*4)+1] = matrix[1][1].AsFloat();
+    mat[(2*4)+1] = matrix[1][2].AsFloat();
+    mat[(3*4)+1] = 0;
+
+    mat[(0*4)+2] = -matrix[2][0].AsFloat();
+    mat[(1*4)+2] = -matrix[2][1].AsFloat();
+    mat[(2*4)+2] = -matrix[2][2].AsFloat();
+    mat[(3*4)+2] = 0;
+
+    mat[(0*4)+3] = matrix[3][0].AsFloat();
+    mat[(1*4)+3] = matrix[3][1].AsFloat();
+    mat[(2*4)+3] = matrix[3][2].AsFloat();
+    mat[(3*4)+3] = 1.0;
+
+#endif
     std::cout << "LoadGLMatrixFrommatrix34: matrix = " << matrix << std::endl;
 
-    std::cout << "translated matrix = " <<std::endl;
-    for(int y=0;y<4;y++)
-    {
-        std::cout << "  ";
-        for(int x=0;x<4;x++)
-        {
-            std::cout << mat[(y*4)+x] << " ";
-        }
-        std::cout << std::endl;
-    }
-
+    DumpMatrix("translated matrix",mat);
     glUniformMatrix4fv(halDisplay.u_matrix, 1, GL_FALSE, mat);
+    AssertGLOK();
+
+
+
+    // multiply in projection matrix
+
+    GLfloat ar;
+    GLfloat temp[16];
+    GLfloat m[16] = {
+       1.0, 0.0, 0.0, 0.0,
+       0.0, 1.0, 0.0, 0.0,
+       0.0, 0.0, 0.1, 0.0,
+       0.0, 0.0, 0.0, 1.0,
+    };
+
+//  GLfloat width = 200;
+//  GLfloat height = 200;
+//  if (width < height)
+//     ar = width;
+//  else
+//     ar = height;
+//
+//  // kts !!! this creates the project matrix
+//  m[0] = 0.1 * ar / width;
+//  m[5] = 0.1 * ar / height;
+//  //memcpy(proj, m, sizeof proj);
+
+//    DumpMatrix("test matrix",m);
+
+    //multiply(m,mat);
+  m[(3*4)+0] = matrix[3][0].AsFloat();
+  m[(3*4)+1] = matrix[3][1].AsFloat();
+  m[(3*4)+2] = matrix[3][2].AsFloat();
+
+    memcpy(&temp[0],&halDisplay.perspectiveMatrix[0][0],sizeof(GLfloat)*16);
+
+    multiply(temp,mat);
+
+    DumpMatrix("final matrix",temp);
+
+    //glViewport(0, 0, (GLint) width, (GLint) height);
+    glUniformMatrix4fv(halDisplay.u_matrix, 1, GL_FALSE, temp);
     AssertGLOK();
 }
 
