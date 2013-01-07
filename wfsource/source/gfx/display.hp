@@ -84,6 +84,8 @@ struct HalDisplay
 
     struct eglut_window *current;
 
+   GLfloat perspectiveMatrix[4][4];
+
    GLuint wfProgram;
    GLint attr_pos;
    GLint attr_color;
