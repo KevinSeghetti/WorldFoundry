@@ -164,7 +164,10 @@ PixelMap::SetGLTexture() const                 // make this pixelmap the current
     if(_parent)
         _parent->SetGLTexture();
     else
+    {
+        glActiveTexture ( _activeTextureIndex );
         glBindTexture(GL_TEXTURE_2D,_glTextureName);
+    }
     AssertGLOK();
 }
 
@@ -184,7 +187,7 @@ PixelMap::SetGLTexture() const                 // make this pixelmap the current
         _parent->SetGLTexture();
     else
     {
-        glActiveTexture ( GL_TEXTURE0 );
+        glActiveTexture ( _activeTextureIndex );
         glBindTexture(GL_TEXTURE_2D,_glTextureName);
     }
 

@@ -119,6 +119,11 @@ private:
 
 #if defined(RENDERER_EGL)
     GLuint _glTextureName;              // index of this pixelmaps texture
+    GLenum _activeTextureIndex;         // actuve texture unit index for this texture
+
+    static GLenum _nextActiveTexture;           // this is incremented each time a pixelmap is created
+                                                // so a potential leak if the game
+                                                // ever starts routinely creating & destroying pixelmaps
 
 #if SIXTEEN_BIT_VRAM
      uint16* _pixelBuffer;

@@ -34,6 +34,8 @@ struct RGB_pixel
 };
 #pragma pack( 4 )
 
+GLenum PixelMap::_nextActiveTexture = GL_TEXTURE0;       // this is incremented each time a pixelmap is created
+
 //==============================================================================
 
 PixelMap::PixelMap(int flags, int xSize, int ySize)
@@ -80,7 +82,14 @@ PixelMap::PixelMap(int flags, int xSize, int ySize)
     assert(_glTextureName);
     AssertGLOK();
     
-    glActiveTexture ( GL_TEXTURE0 );
+    //_activeTextureIndex = _nextActiveTexture++;
+    std::cout << "kts WIP: handle textures per room" << std::endl;
+    _activeTextureIndex = _nextActiveTexture;
+    std::cout << "activeTextureIndex = " << _activeTextureIndex << ", texturename = " << _glTextureName << std::endl;
+    AssertMsg(_activeTextureIndex < GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, "out of GL texture units");
+        
+    glActiveTexture ( _activeTextureIndex );
+
     // Bind the texture object
     glBindTexture ( GL_TEXTURE_2D, _glTextureName );
 
@@ -325,7 +334,7 @@ PixelMap::Load(const void* memory, int xOffset, int yOffset, int xSize, int ySiz
         AssertGLOK();
 
         assert(_glTextureName);
-        glActiveTexture(GL_TEXTURE0);
+        glActiveTexture ( _activeTextureIndex );
         glBindTexture(GL_TEXTURE_2D,_glTextureName);
 
 #if SIXTEEN_BIT_VRAM
