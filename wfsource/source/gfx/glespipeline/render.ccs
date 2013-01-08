@@ -88,6 +88,7 @@ CalcAndSetUV(unsigned short tpage, unsigned char uin, unsigned char vin, const P
     float uResult(float(u)/VRAM_WIDTHF);
     float vResult(float(v)/VRAM_HEIGHTF);
 #else
+    texturePixelMap.SetGLTexture();
     float uResult(float(u)/texturePixelMap.GetBaseXSize());
     float vResult(float(v)/texturePixelMap.GetBaseYSize());
 #endif
