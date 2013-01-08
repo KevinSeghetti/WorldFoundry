@@ -118,22 +118,11 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
    };
 
 //
-//#if FLAG_TEXTURE
-//   glEnable( GL_TEXTURE_2D );
-//   assert(ValidPtr(poly.pPixelMap));
-//   SetTexture(*poly.pPixelMap);
-//#else
-//   glDisable( GL_TEXTURE_2D );
-//#endif
 //   AssertGLOK();
-//
-//   glBegin( GL_TRIANGLES );
 //
 //   const Vector3_PS& glnormal = (globalRendererVariables.currentRenderFace->normal);
 //   glNormal3f(glnormal.X().AsFloat(),glnormal.Y().AsFloat(),glnormal.Z().AsFloat());
 //
-//   glUseProgram(halDisplay.wfProgram);
-   glBindBuffer(GL_ARRAY_BUFFER, 0);         // unbind any existing bindng
    glVertexAttribPointer(halDisplay.attr_pos, 3, GL_FIXED, GL_FALSE, 0, reinterpret_cast<const GLfixed **>(globalRendererVariables.gteVect));
 
    color[0][0] = float(poly.r0)/256.0;
@@ -194,6 +183,7 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
 
 #endif
 #else         // FLAG_TEXTURE
+   SetTexture(*poly.pPixelMap);
    glUniform1i(halDisplay.u_textured, 1);
    AssertGLOK();
 
