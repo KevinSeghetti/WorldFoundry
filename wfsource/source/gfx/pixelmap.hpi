@@ -158,7 +158,7 @@ inline void
 PixelMap::SetGLTexture() const                 // make this pixelmap the current GL texture
 {
     Validate();
-    //cout << "setGLTexture: glListIndex = " << _glListIndex << ",_parent = " << (void*)_parent << std::endl;
+    //std::cout << "SetGLTexture: glListIndex = " << _glListIndex << ",_parent = " << (void*)_parent << std::endl;
 
     // kts this is incorrect, only like this for the transition, eventually will assert if has a parent
     if(_parent)
@@ -180,7 +180,7 @@ inline void
 PixelMap::SetGLTexture() const                 // make this pixelmap the current GL texture
 {
     Validate();
-    //cout << "setGLTexture: glListIndex = " << _glListIndex << ",_parent = " << (void*)_parent << std::endl;
+    //std::cout << "SetGLTexture: glTextureName = " << _glTextureName << std::endl;
 
     // kts this is incorrect, only like this for the transition, eventually will assert if has a parent
     if(_parent)
