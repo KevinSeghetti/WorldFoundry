@@ -447,6 +447,7 @@ PixelMap::Load(const void* memory, int xOffset, int yOffset, int xSize, int ySiz
         glBindTexture(GL_TEXTURE_2D,_glTextureName);
         // Set the sampler texture unit to 0
         glUniform1i(halDisplay.s_texture, 0);
+        AssertGLOK();
 
 #if SIXTEEN_BIT_VRAM
 #define TEXTURE_INTERNAL_FORMAT GL_RGB5

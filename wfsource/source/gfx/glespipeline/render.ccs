@@ -111,19 +111,19 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
    assert(primitive);
    POLY_@+POLY_TYPE@+& poly = (*(POLY_@+POLY_TYPE@+*)primitive);
 
-   static const GLfloat colors[3][4] = {
-      { 1, 0, 0, 1 },
-      { 0, 1, 0, 1 },
-      { 0, 0, 1, 1 }
-   };
+   glVertexAttribPointer(halDisplay.a_pos,    3, GL_FIXED, GL_FALSE, 0, reinterpret_cast<const GLfixed **>(globalRendererVariables.gteVect));
 
-//
-//   AssertGLOK();
-//
-//   const Vector3_PS& glnormal = (globalRendererVariables.currentRenderFace->normal);
-//   glNormal3f(glnormal.X().AsFloat(),glnormal.Y().AsFloat(),glnormal.Z().AsFloat());
-//
-   glVertexAttribPointer(halDisplay.attr_pos, 3, GL_FIXED, GL_FALSE, 0, reinterpret_cast<const GLfixed **>(globalRendererVariables.gteVect));
+   GLfloat normal[3];
+   normal[0] = globalRendererVariables.currentRenderFace->normal[0].AsFloat();
+   normal[1] = globalRendererVariables.currentRenderFace->normal[1].AsFloat();
+   normal[2] = globalRendererVariables.currentRenderFace->normal[2].AsFloat();
+
+   //glUniform3fv(halDisplay.a_normal, 1, normal);
+   //AssertGLOK();
+
+   // use the constant version when we have a single normal for all 3 verticies
+   glVertexAttrib3fv(halDisplay.a_normal,normal);
+   AssertGLOK();
 
    color[0][0] = float(poly.r0)/256.0;
    color[0][1] = float(poly.g0)/256.0;
@@ -136,7 +136,7 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
    AssertGLOK();
 #if FLAG_GOURAUD == 0
 //   // f3
-   glVertexAttrib3fv(halDisplay.attr_color, &color[0][0]);
+   glVertexAttrib3fv(halDisplay.a_color, &color[0][0]);
    AssertGLOK();
 
 // 
@@ -158,7 +158,7 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
    color[2][0] = float(poly.r2)/256.0;
    color[2][1] = float(poly.g2)/256.0;
    color[2][2] = float(poly.b2)/256.0;
-   glVertexAttribPointer(halDisplay.attr_color, 3, GL_FLOAT, GL_FALSE, 0, color);
+   glVertexAttribPointer(halDisplay.a_color, 3, GL_FLOAT, GL_FALSE, 0, color);
    AssertGLOK();
 
 // 
@@ -201,7 +201,7 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
 
 #if FLAG_GOURAUD == 0
    //ft3
-   glVertexAttrib3fv(halDisplay.attr_color, &color[0][0]);
+   glVertexAttrib3fv(halDisplay.a_color, &color[0][0]);
    AssertGLOK();
 ////            glColor3ub( 255, 0, 0 );
 //   color[0] = float(poly.r0)/256.0;
@@ -223,7 +223,7 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
    color[2][0] = float(poly.r2)/256.0;
    color[2][1] = float(poly.g2)/256.0;
    color[2][2] = float(poly.b2)/256.0;
-   glVertexAttribPointer(halDisplay.attr_color, 3, GL_FLOAT, GL_FALSE, 0, color);
+   glVertexAttribPointer(halDisplay.a_color, 3, GL_FLOAT, GL_FALSE, 0, color);
    AssertGLOK();
 
 //   CalcAndSetUV(poly.tpage, poly.u0,poly.v0,*poly.pPixelMap);
@@ -253,15 +253,15 @@ RenderObject3D::RenderPoly3D@+RENDER_TYPE(Primitive* primitive)
 
    AssertGLOK();
 
-   glEnableVertexAttribArray(halDisplay.attr_pos);
-   glEnableVertexAttribArray(halDisplay.attr_color);
+   glEnableVertexAttribArray(halDisplay.a_pos);
+   glEnableVertexAttribArray(halDisplay.a_color);
    AssertGLOK();
 
    glDrawArrays(GL_TRIANGLES, 0, 3);
    AssertGLOK();
 
-   glDisableVertexAttribArray(halDisplay.attr_pos);
-   glDisableVertexAttribArray(halDisplay.attr_color);
+   glDisableVertexAttribArray(halDisplay.a_pos);
+   glDisableVertexAttribArray(halDisplay.a_color);
    glDisableVertexAttribArray(halDisplay.a_texCoord);
    AssertGLOK();
 

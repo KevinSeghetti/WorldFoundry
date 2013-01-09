@@ -77,6 +77,29 @@ struct eglut_window {
 HalDisplay halDisplay;
 
 //===============================================================================
+//
+
+void
+DumpUniformData( GLuint index)
+{
+   char name[100];
+   GLint size;
+   GLenum type;
+   AssertGLOK();
+
+
+
+   DBSTREAM1( cgfx << "Uniform data for 0x" << std::hex << index << " in program " << halDisplay.wfProgram << std::endl; )
+   index &= 0x7fff;        // kts test
+
+   glGetActiveUniform(halDisplay.wfProgram, index,100, NULL, &size, &type, name);
+   AssertGLOK();
+   DBSTREAM1( cgfx << "  name:" << name << std::endl; )
+   DBSTREAM1( cgfx << "  size:" << size << std::endl; )
+   DBSTREAM1( cgfx << "  type:" << type << std::endl; )
+}
+
+//===============================================================================
 
 void
 _eglutNativeInitWindow(struct eglut_window *win, const char *title,
@@ -198,7 +221,7 @@ LinkShaderProgram(GLuint program)
       char log[1000];
       GLsizei len;
       glGetProgramInfoLog(program, 1000, &len, log);
-      printf("Error: linking:\n%s\n", log);
+      DBSTREAM1( cerror << "Error: linking:\n" <<  log << std::endl;)
       exit(1);
    }
 }
@@ -210,8 +233,11 @@ create_shaders(void)
 {
    static const char *vertShaderText =
       "uniform mat4 modelviewProjection;\n"
+      "uniform vec4 lightvectors[3];\n"
+      "uniform vec4 lightcolors[4];\n"     // 3 directional, + 1 ambient
       "attribute vec4 pos;\n"
-      "attribute vec4 color;\n"
+      "attribute vec4 normal;\n"
+      "attribute vec4 color;\n"           // vertex color
       "attribute vec2 a_texCoord;\n"
       "varying vec2 v_texCoord;\n"
       "varying vec4 v_color;\n"
@@ -229,7 +255,7 @@ create_shaders(void)
 //    "   gl_Position.y *= hsz;"
 //    "   gl_Position.x *= 0.01;"
 //    "   gl_Position.y *= 0.01;"
-      "   v_color = color;\n"
+      "   v_color = color+lightcolors[0]+lightvectors[0];\n"
 //      "   gl_Position.z = clamp(gl_Position.z,0.1,0.9);\n"
       "   v_texCoord = a_texCoord;\n"
       "}\n";
@@ -258,16 +284,14 @@ create_shaders(void)
    glCompileShader(fragShader);
    glGetShaderiv(fragShader, GL_COMPILE_STATUS, &stat);
    if (!stat) {
-      printf("Error: fragment shader did not compile!\n");
+      DBSTREAM1( cerror << "Error: fragment shader did not compile" << std::endl;)
 #define LOG_LENGTH 5000
 
       char infoLog[LOG_LENGTH+1];
       int length;
       glGetShaderInfoLog(fragShader,LOG_LENGTH,&length,infoLog);
       infoLog[length]=0;
-      printf("log = \n");
-      printf("%s\n",infoLog);
-
+      DBSTREAM1( cerror << "log = \n" << infoLog << std::endl;)
       exit(1);
    }
 
@@ -280,60 +304,84 @@ create_shaders(void)
       int length;
       glGetShaderInfoLog(vertShader,LOG_LENGTH,&length,infoLog);
       infoLog[length]=0;
-      printf("Error: vertex shader did not compile!\n");
-      printf("log = \n");
-      printf("%s\n",infoLog);
+
+      DBSTREAM1( cerror << "Error: vertex shader did not compile" << std::endl;)
+      DBSTREAM1( cerror << "log = \n" << infoLog << std::endl;)
       exit(1);
    }
 
    halDisplay.wfProgram = glCreateProgram();
-   std::cout << "wfProgram = " << halDisplay.wfProgram << std::endl;
+
+   DBSTREAM1( cgfx << "wfProgram = " << halDisplay.wfProgram << std::endl; )
    glAttachShader(halDisplay.wfProgram, fragShader);
    glAttachShader(halDisplay.wfProgram, vertShader);
    LinkShaderProgram(halDisplay.wfProgram);
+   AssertGLOK();
 
    glUseProgram(halDisplay.wfProgram);
+   AssertGLOK();
 
-   halDisplay.attr_pos = 0;
-   halDisplay.attr_color = 1;
-   halDisplay.a_texCoord = 2;
+   halDisplay.a_pos      = 0;
+   halDisplay.a_normal   = 1;
+   halDisplay.a_color    = 2;
+   halDisplay.a_texCoord = 3;
 
    if (1) {
       /* test setting attrib locations */
-      glBindAttribLocation(halDisplay.wfProgram, halDisplay.attr_pos, "pos");
-      glBindAttribLocation(halDisplay.wfProgram, halDisplay.attr_color, "color");
+      glBindAttribLocation(halDisplay.wfProgram, halDisplay.a_pos, "pos");
+      glBindAttribLocation(halDisplay.wfProgram, halDisplay.a_normal, "normal");
+      glBindAttribLocation(halDisplay.wfProgram, halDisplay.a_color, "color");
       glBindAttribLocation(halDisplay.wfProgram, halDisplay.a_texCoord, "a_texCoord");
       LinkShaderProgram(halDisplay.wfProgram); /* needed to put attribs into effect */
+      AssertGLOK();
    }
    else {
       /* test automatic attrib locations */
-      halDisplay.attr_pos = glGetAttribLocation(halDisplay.wfProgram, "pos");
-      halDisplay.attr_color = glGetAttribLocation(halDisplay.wfProgram, "color");
+      halDisplay.a_pos = glGetAttribLocation(halDisplay.wfProgram, "pos");
+      halDisplay.a_normal = glGetAttribLocation(halDisplay.wfProgram, "normal");
+      halDisplay.a_color = glGetAttribLocation(halDisplay.wfProgram, "color");
    }
 
    glGetProgramiv(halDisplay.wfProgram, GL_ACTIVE_ATTRIBUTES,&stat);
-   std::cout << "program stat: active attributes = " << stat << std::endl;
+   DBSTREAM1( cgfx << "program stat: active attributes = " << stat << std::endl; )
    glGetProgramiv(halDisplay.wfProgram, GL_ACTIVE_UNIFORMS,&stat);
-   std::cout << "program stat: active uniforms = " << stat << std::endl;
+   DBSTREAM1( cgfx << "program stat: active uniforms = " << stat << std::endl; )
    glGetProgramiv(halDisplay.wfProgram, GL_VALIDATE_STATUS,&stat);
-   std::cout << "program stat: validate status = " << stat << std::endl;
-
-   halDisplay.u_matrix = glGetUniformLocation(halDisplay.wfProgram, "modelviewProjection");
-   RangeCheck(0,halDisplay.u_matrix,128);
-
-   // Get the sampler locations
-   halDisplay.s_texture  = glGetUniformLocation(halDisplay.wfProgram,"s_texture");
-   RangeCheck(65536,halDisplay.s_texture,65536+128);
+   DBSTREAM1( cgfx << "program stat: validate status = " << stat << std::endl; )
+   AssertGLOK();
 
    // get the bool location
    halDisplay.u_textured  = glGetUniformLocation(halDisplay.wfProgram,"u_textured");
    assertNe(0,halDisplay.u_textured);
+   AssertGLOK();
+   DumpUniformData(halDisplay.u_textured);
 
-   printf("Uniform modelviewProjection at %d\n", halDisplay.u_matrix);
-   printf("Attrib pos at %d\n", halDisplay.attr_pos);
-   printf("Attrib color at %d\n", halDisplay.attr_color);
-   printf("s_texture at %d\n", halDisplay.s_texture);
-   printf("u_textured at %d\n", halDisplay.u_textured);
+   halDisplay.u_matrix = glGetUniformLocation(halDisplay.wfProgram, "modelviewProjection");
+   RangeCheck(0,halDisplay.u_matrix,65536*128);
+   DumpUniformData(halDisplay.u_matrix);
+
+   halDisplay.u_lightvectors = glGetUniformLocation(halDisplay.wfProgram, "lightvectors");
+   RangeCheck(0,halDisplay.u_lightvectors,65536*128);
+   DumpUniformData(halDisplay.u_lightvectors);
+
+   halDisplay.u_lightcolors = glGetUniformLocation(halDisplay.wfProgram, "lightcolors");
+   RangeCheck(0,halDisplay.u_lightcolors,65536*128);
+   DumpUniformData(halDisplay.u_lightcolors);
+
+
+   // Get the sampler locations
+   halDisplay.s_texture  = glGetUniformLocation(halDisplay.wfProgram,"s_texture");
+   AssertGLOK();
+   RangeCheck(65536,halDisplay.s_texture,0x3ffff);
+   DumpUniformData(halDisplay.s_texture);
+
+
+   DBSTREAM1( cgfx << "Uniform modelviewProjection at " << halDisplay.u_matrix; )
+   DBSTREAM1( cgfx << "Attrib pos at " << halDisplay.a_pos; )
+   DBSTREAM1( cgfx << "Attrib normal at " <<  halDisplay.a_normal; )
+   DBSTREAM1( cgfx << "Attrib color at " <<  halDisplay.a_color; )
+   DBSTREAM1( cgfx << "s_texture at " <<  halDisplay.s_texture; )
+   DBSTREAM1( cgfx << "u_textured at " <<  halDisplay.u_textured; )
 }
 
 bool
@@ -348,21 +396,17 @@ InitWindow( int /*xPos*/, int /*yPos*/, int /*xSize*/, int /*ySize*/ )
 
    halDisplay.eglDisplay = eglGetDisplay(halDisplay.native_dpy);
    if (!halDisplay.eglDisplay) {
-      printf("Error: couldn't open display %s\n",
-         getenv("DISPLAY"));
+      DBSTREAM1( cerror << "Error: couldn't open display " << getenv("DISPLAY") << std::endl;)
       exit -1;
    }
 
    if (!eglInitialize(halDisplay.eglDisplay, &halDisplay.major, &halDisplay.minor))
       Fail("failed to initialize EGL display");
 
-   printf("EGL_VERSION = %s\n", eglQueryString(halDisplay.eglDisplay, EGL_VERSION));
-   printf("EGL_VENDOR = %s\n", eglQueryString(halDisplay.eglDisplay, EGL_VENDOR));
-   printf("EGL_EXTENSIONS = %s\n",
-         eglQueryString(halDisplay.eglDisplay, EGL_EXTENSIONS));
-   printf("EGL_CLIENT_APIS = %s\n",
-         eglQueryString(halDisplay.eglDisplay, EGL_CLIENT_APIS));
-
+   DBSTREAM1( cgfx << "EGL_VERSION = "    << eglQueryString(halDisplay.eglDisplay, EGL_VERSION)    << std::endl; )
+   DBSTREAM1( cgfx << "EGL_VENDOR = "     << eglQueryString(halDisplay.eglDisplay, EGL_VENDOR)     << std::endl; )
+   DBSTREAM1( cgfx << "EGL_EXTENSIONS = " << eglQueryString(halDisplay.eglDisplay, EGL_EXTENSIONS) << std::endl; )
+   DBSTREAM1( cgfx << "EGL_CLIENT_APIS = "<< eglQueryString(halDisplay.eglDisplay, EGL_CLIENT_APIS)<< std::endl; )
 
    struct eglut_window *win;
 
@@ -380,8 +424,10 @@ InitWindow( int /*xPos*/, int /*yPos*/, int /*xSize*/, int /*ySize*/ )
    //glEnable(GL_CULL_FACE);
    glEnable(GL_DEPTH_TEST);
 
+   AssertGLOK();
 
    create_shaders();       // wf program
+   AssertGLOK();
 
     return true;
 }

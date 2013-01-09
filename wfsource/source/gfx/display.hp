@@ -87,11 +87,16 @@ struct HalDisplay
    GLfloat perspectiveMatrix[4][4];
 
    GLuint wfProgram;
-   GLint attr_pos;
-   GLint attr_color;
+
    GLint u_matrix;
-   GLint s_texture;
+   GLint u_lightvectors;
+   GLint u_lightcolors;
    GLint u_textured;
+   GLint s_texture;
+
+   GLint a_pos;
+   GLint a_normal;
+   GLint a_color;
    GLint a_texCoord;
 };
 

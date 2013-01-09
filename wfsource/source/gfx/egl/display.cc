@@ -29,6 +29,7 @@
 
 #include <gfx/egl/wfprim.h>
 
+#include <cpplib/libstrm.hp>
 #include <memory/memory.hp>
 #include <gfx/pixelmap.hp>
 #include <gfx/rendobj3.hp>

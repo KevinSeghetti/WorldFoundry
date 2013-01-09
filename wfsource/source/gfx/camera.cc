@@ -112,9 +112,7 @@ Matrix34 viewToScreen = Matrix34(
 	: "$12"  )
 
 
-#else
-
-#if defined(RENDERER_PIPELINE_SOFTWARE)
+#elif defined(RENDERER_PIPELINE_SOFTWARE)
 int32 gte_DQA;
 int32 gte_DQB;
 Color gte_lcm[3];
@@ -124,7 +122,7 @@ Matrix34 gte_llm;
 
 #define gte_SetDQA(a) gte_DQA = (a)
 #define gte_SetDQB(a) gte_DQB = (a)
-#endif
+#elif defined(RENDERER_PIPELINE_GLES)
 #endif
 
 //=============================================================================
@@ -465,29 +463,35 @@ RenderCamera::RenderBegin()
 ////#error GL light assumption violated
 ////#endif
 //
+   AssertGLOK();
 //   glMatrixMode(GL_MODELVIEW);               // so that lights don't get rotated
    LoadGLMatrixFromMatrix34(_invertedPosition);
+   AssertGLOK();
 //
-//    for(int index=0;index < MAX_LIGHTS;index++)
-//    {
-//        GLfloat lightDirection[4];
-//        lightDirection[3] = 0.0;
-//
-//        // negate because we store the direction the light travels, where GL stores the lights position
-//        lightDirection[0] = -_dirLightDirections[index].X().AsFloat();
-//        lightDirection[1] = -_dirLightDirections[index].Y().AsFloat();
-//        lightDirection[2] = -_dirLightDirections[index].Z().AsFloat();
-////        cout << "light direction[" << index << "]: " << _dirLightDirections[index] << endl;
-////        cout << "light color: " << _dirLightColors[index] << endl;
-//        glLightfv(GLLightTable[index],GL_POSITION,lightDirection);
-//
-//        ConvertToGLColor(_dirLightColors[index],lightColor);
-//
-//        glLightfv(GLLightTable[index],GL_AMBIENT,lightBlack);
-//        glLightfv(GLLightTable[index],GL_DIFFUSE,lightColor);
-//        glLightfv(GLLightTable[index],GL_SPECULAR,lightBlack);
-//        AssertGLOK();
-//    }
+
+   GLfloat lightDirection[MAX_LIGHTS][4];
+
+   for(int index=0;index < MAX_LIGHTS;index++)
+   {
+      // negate because we store the direction the light travels, where GL stores the lights position
+      lightDirection[index][0] = -_dirLightDirections[index].X().AsFloat();
+      lightDirection[index][1] = -_dirLightDirections[index].Y().AsFloat();
+      lightDirection[index][2] = -_dirLightDirections[index].Z().AsFloat();
+      lightDirection[index][3] = 0.0;
+   //        cout << "light direction[" << index << "]: " << _dirLightDirections[index] << endl;
+   //        cout << "light color: " << _dirLightColors[index] << endl;
+
+//     glLightfv(GLLightTable[index],GL_POSITION,lightDirection);
+//     ConvertToGLColor(_dirLightColors[index],lightColor);
+//     glLightfv(GLLightTable[index],GL_AMBIENT,lightBlack);
+//     glLightfv(GLLightTable[index],GL_DIFFUSE,lightColor);
+//     glLightfv(GLLightTable[index],GL_SPECULAR,lightBlack);
+       AssertGLOK();
+   }
+
+   glUniformMatrix4fv(halDisplay.u_lightvectors, MAX_LIGHTS, GL_FALSE, &lightDirection[0][0]);
+   AssertGLOK();
+
 //
 //   ConvertToGLColor(_fogColor,lightColor);
 //   glFogfv(GL_FOG_COLOR, lightColor);
