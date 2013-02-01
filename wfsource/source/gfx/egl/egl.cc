@@ -477,3 +477,35 @@ WindowReshape(int width, int height)
 
 //===============================================================================
 
+const char * glErrorCodes[] = 
+{
+   "GL_NO_ERROR",
+   "GL_INVALID_VALUE",
+   "GL_INVALID_OPERATION",
+   "GL_STACK_OVERFLOW",
+   "GL_STACK_UNDERFLOW",
+   "GL_OUT_OF_MEMORY"
+};
+
+//-------------------------------------------------------------------------------
+
+const char* LookupGLError(GLenum error)
+{
+   if(error >= 0x500 && error <= 0x505)
+   {
+      return glErrorCodes[error-0x500];
+   }
+   else
+   {
+      if(error == 0)
+      {
+         return "No Error";
+      }
+   }
+
+   return "Unknown error";
+}
+
+//===============================================================================
+
+

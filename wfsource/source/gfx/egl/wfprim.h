@@ -6,17 +6,6 @@
 #define GFX_WFPRIM_H
 
 //==============================================================================
-
-//#if DO_ASSERTIONS
-//#if SW_DBSTREAM
-
-// kts 4/20/2002 5:33PM windows version at least needs glu for release build
-//#include <GL/glu.h>
-//#endif
-//#endif
-
-//==============================================================================
-        
         
 //#define GL_NO_ERROR 				0x0
 //#define GL_INVALID_ENUM				0x0500
@@ -33,6 +22,9 @@
 // kts turn these back on later
 // DO_ASSERTIONS
 
+extern const char* LookupGLError(unsigned int error);
+
+
 #if SW_DBSTREAM
 
 #define AssertGLOKMsg(string)        \
@@ -42,7 +34,7 @@
     { \
         while(glError != GL_NO_ERROR) \
         { \
-            DBSTREAM1(cerror << "GL error: 0x" << std::hex << glError << std::endl; \
+            DBSTREAM1(cerror << "GL error: 0x" << std::hex << glError << " = " << LookupGLError(glError) << std::endl; \
             cerror << "WFError: " << string << std::endl;) \
             glError = glGetError(); \
         } \
