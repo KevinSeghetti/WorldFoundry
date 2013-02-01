@@ -470,6 +470,7 @@ RenderCamera::RenderBegin()
 //
 
    GLfloat lightDirection[MAX_LIGHTS][4];
+   GLfloat lightColors[MAX_LIGHTS+1][4];
 
    for(int index=0;index < MAX_LIGHTS;index++)
    {
@@ -478,18 +479,25 @@ RenderCamera::RenderBegin()
       lightDirection[index][1] = -_dirLightDirections[index].Y().AsFloat();
       lightDirection[index][2] = -_dirLightDirections[index].Z().AsFloat();
       lightDirection[index][3] = 0.0;
-   //        cout << "light direction[" << index << "]: " << _dirLightDirections[index] << endl;
-   //        cout << "light color: " << _dirLightColors[index] << endl;
+//           std::cout << "lighgt direction[" << index << "]: " << _dirLightDirections[index] << std::endl;
+//           std::cout << "light color: " << _dirLightColors[index] << std::endl;
 
 //     glLightfv(GLLightTable[index],GL_POSITION,lightDirection);
-//     ConvertToGLColor(_dirLightColors[index],lightColor);
+     ConvertToGLColor(_dirLightColors[index],lightColors[index]);
 //     glLightfv(GLLightTable[index],GL_AMBIENT,lightBlack);
 //     glLightfv(GLLightTable[index],GL_DIFFUSE,lightColor);
 //     glLightfv(GLLightTable[index],GL_SPECULAR,lightBlack);
        AssertGLOK();
    }
 
-   glUniformMatrix4fv(halDisplay.u_lightvectors, MAX_LIGHTS, GL_FALSE, &lightDirection[0][0]);
+   // append ambient color to end of light color list
+   ConvertToGLColor(_ambientColor,lightColors[MAX_LIGHTS]);
+
+
+   glUniform4fv(halDisplay.u_lightvectors, MAX_LIGHTS,  &lightDirection[0][0]);
+   AssertGLOK();
+
+   glUniform4fv(halDisplay.u_lightcolors, MAX_LIGHTS+1,  &lightColors[0][0]);
    AssertGLOK();
 
 //

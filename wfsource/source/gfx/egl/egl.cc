@@ -232,6 +232,11 @@ static void
 create_shaders(void)
 {
    static const char *vertShaderText =
+      "const float       c_zero = 0.0;\n"
+      "const float       c_one = 1.0;\n"
+      "const int         indx_zero = 0;\n"
+      "const int         indx_one = 1;\n"
+
       "uniform mat4 modelviewProjection;\n"
       "uniform vec4 lightvectors[3];\n"
       "uniform vec4 lightcolors[4];\n"     // 3 directional, + 1 ambient
@@ -241,7 +246,10 @@ create_shaders(void)
       "attribute vec2 a_texCoord;\n"
       "varying vec2 v_texCoord;\n"
       "varying vec4 v_color;\n"
+      "float   ndot;\n"
       "void main() {\n"
+      "   int i;\n"
+
       "   gl_Position = modelviewProjection * pos;\n"
 //      "   gl_Position.x *= 0.1;"
 //      "   gl_Position.y *= 0.1;"
@@ -255,7 +263,17 @@ create_shaders(void)
 //    "   gl_Position.y *= hsz;"
 //    "   gl_Position.x *= 0.01;"
 //    "   gl_Position.y *= 0.01;"
-      "   v_color = color+lightcolors[0]+lightvectors[0];\n"
+      ""
+      "   v_color = color;\n"
+      ""
+      "for (i=indx_zero; i<3; i++)                                        "
+      "{                                                                    "
+      "   ndot = max(c_zero, dot(normal.xyz, lightvectors[i].xyz));    "
+      "   v_color += (ndot * lightcolors[i]);"
+      "}                                                                    "
+
+
+//      "   v_color = color+lightcolors[0]+lightvectors[0];\n"
 //      "   gl_Position.z = clamp(gl_Position.z,0.1,0.9);\n"
       "   v_texCoord = a_texCoord;\n"
       "}\n";
@@ -507,5 +525,4 @@ const char* LookupGLError(GLenum error)
 }
 
 //===============================================================================
-
 
