@@ -464,10 +464,6 @@ RenderCamera::RenderBegin()
 ////#endif
 //
    AssertGLOK();
-//   glMatrixMode(GL_MODELVIEW);               // so that lights don't get rotated
-   LoadGLMatrixFromMatrix34(_invertedPosition);
-   AssertGLOK();
-//
 
    GLfloat lightDirection[MAX_LIGHTS][4];
    GLfloat lightColors[MAX_LIGHTS+1][4];
@@ -492,7 +488,6 @@ RenderCamera::RenderBegin()
 
    // append ambient color to end of light color list
    ConvertToGLColor(_ambientColor,lightColors[MAX_LIGHTS]);
-
 
    glUniform4fv(halDisplay.u_lightvectors, MAX_LIGHTS,  &lightDirection[0][0]);
    AssertGLOK();
