@@ -88,7 +88,9 @@ struct HalDisplay
 
    GLuint wfProgram;
 
-   GLint u_matrix;
+   GLint u_modelViewProjectionMatrix;               // full modelview matris
+   GLint u_invertedModelViewMatrix;       // inverted position / camera matrix
+
    GLint u_lightvectors;
    GLint u_lightcolors;
    GLint u_textured;

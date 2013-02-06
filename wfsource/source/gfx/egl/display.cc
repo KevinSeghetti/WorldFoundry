@@ -543,9 +543,8 @@ LoadGLMatrixFromMatrix34(const Matrix34& matrix)
     //std::cout << "LoadGLMatrixFrommatrix34: matrix = " << matrix << std::endl;
 
     //DumpMatrix("translated matrix",mat);
-    glUniformMatrix4fv(halDisplay.u_matrix, 1, GL_FALSE, mat);
-    AssertGLOK();
 
+    // kts invert this matrix and store into inverted matrix
 
     // multiply in projection matrix
     GLfloat temp[16];
@@ -555,7 +554,7 @@ LoadGLMatrixFromMatrix34(const Matrix34& matrix)
     //DumpMatrix("final matrix",temp);
 
     //glViewport(0, 0, (GLint) width, (GLint) height);
-    glUniformMatrix4fv(halDisplay.u_matrix, 1, GL_FALSE, temp);
+    glUniformMatrix4fv(halDisplay.u_modelViewProjectionMatrix, 1, GL_FALSE, temp);
     AssertGLOK();
 }
 
