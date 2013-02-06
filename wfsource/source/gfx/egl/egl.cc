@@ -238,10 +238,13 @@ create_shaders(void)
       "const int         indx_one = 1;\n"
 
       "uniform mat4 modelviewProjection;\n"
+      // inverse modelview 
+      "uniform mat4 inv_modelview_matrix;\n"  
+
       "uniform vec4 lightvectors[3];\n"
       "uniform vec4 lightcolors[4];\n"     // 3 directional, + 1 ambient
       "attribute vec4 pos;\n"
-      "attribute vec4 normal;\n"
+      "attribute vec4 a_normal;\n"
       "attribute vec4 color;\n"           // vertex color
       "attribute vec2 a_texCoord;\n"
       "varying vec2 v_texCoord;\n"
@@ -249,6 +252,7 @@ create_shaders(void)
       "float   ndot;\n"
       "void main() {\n"
       "   int i;\n"
+      "   vec4 t_rotatednormal;\n"
 
       "   gl_Position = modelviewProjection * pos;\n"
 //      "   gl_Position.x *= 0.1;"
@@ -264,11 +268,22 @@ create_shaders(void)
 //    "   gl_Position.x *= 0.01;"
 //    "   gl_Position.y *= 0.01;"
       ""
+
+
+      // kts reference sample
+//    normal = inv_modelview_matrix * a_normal;
+//    if(rescale_normal)
+//       normal = rescale_normal_factor * normal;
+//    if (normalize_normal)
+//      normal = normalize(n);
+
+      "t_rotatednormal = inv_modelview_matrix * a_normal;"
+
       "   v_color = color;\n"
       ""
       "for (i=indx_zero; i<3; i++)                                        "
       "{                                                                    "
-      "   ndot = max(c_zero, dot(normal.xyz, lightvectors[i].xyz));    "
+      "   ndot = max(c_zero, dot(t_rotatednormal.xyz, lightvectors[i].xyz));    "
       "   v_color += (ndot * lightcolors[i]);"
       "}                                                                    "
 
@@ -374,9 +389,13 @@ create_shaders(void)
    AssertGLOK();
    DumpUniformData(halDisplay.u_textured);
 
-   halDisplay.u_matrix = glGetUniformLocation(halDisplay.wfProgram, "modelviewProjection");
-   RangeCheck(0,halDisplay.u_matrix,65536*128);
-   DumpUniformData(halDisplay.u_matrix);
+   halDisplay.u_modelViewProjectionMatrix = glGetUniformLocation(halDisplay.wfProgram, "modelviewProjection");
+   RangeCheck(0,halDisplay.u_modelViewProjectionMatrix,65536*128);
+   DumpUniformData(halDisplay.u_modelViewProjectionMatrix);
+
+   halDisplay.u_invertedModelViewMatrix = glGetUniformLocation(halDisplay.wfProgram, "inv_modelview_matrix");
+   RangeCheck(0,halDisplay.u_invertedModelViewMatrix,65536*128);
+   DumpUniformData(halDisplay.u_invertedModelViewMatrix);
 
    halDisplay.u_lightvectors = glGetUniformLocation(halDisplay.wfProgram, "lightvectors");
    RangeCheck(0,halDisplay.u_lightvectors,65536*128);
@@ -390,11 +409,11 @@ create_shaders(void)
    // Get the sampler locations
    halDisplay.s_texture  = glGetUniformLocation(halDisplay.wfProgram,"s_texture");
    AssertGLOK();
-   RangeCheck(65536,halDisplay.s_texture,0x3ffff);
+   RangeCheckInclusive(65536,halDisplay.s_texture,0x40000);
    DumpUniformData(halDisplay.s_texture);
 
 
-   DBSTREAM1( cgfx << "Uniform modelviewProjection at " << halDisplay.u_matrix; )
+   DBSTREAM1( cgfx << "Uniform modelviewProjection at " << halDisplay.u_modelViewProjectionMatrix; )
    DBSTREAM1( cgfx << "Attrib pos at " << halDisplay.a_pos; )
    DBSTREAM1( cgfx << "Attrib normal at " <<  halDisplay.a_normal; )
    DBSTREAM1( cgfx << "Attrib color at " <<  halDisplay.a_color; )
