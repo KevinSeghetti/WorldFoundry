@@ -658,6 +658,8 @@ RenderCamera::RenderObject(RenderObject3D& object,const Matrix34& objectPosition
     //cout << "invertedObjectMatrix = " << invertedObjectMatrix << std::endl;
     invertedObjectMatrix[3] = Vector3::zero;
 
+    LoadInvertedModelViewMatrixFromMatrix34(invertedObjectMatrix);
+
 	Matrix34 temp(objectPosition);
 	temp *= _invertedPosition;
 

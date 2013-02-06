@@ -50,7 +50,7 @@ RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
 {
    DBSTREAM1( cgfx<< "RenderObject3D::Render" << std::endl; )
 
-#pragma message ("KTS " __FILE__ ": added gl render code")
+#pragma message ("KTS " __FILE__ ": add gles render code")
 }
 
 //============================================================================

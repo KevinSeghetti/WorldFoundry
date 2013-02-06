@@ -77,7 +77,7 @@ public:
 private:
 	ViewPort& _viewPort;
 	Matrix34 _position;
-	Matrix34 _invertedPosition;
+	Matrix34 _invertedPosition;            // inverted version of position matrix, used for lighting
 
 	enum { MAX_LIGHTS = 3 };
 	Vector3	_dirLightDirections[MAX_LIGHTS];
