@@ -104,7 +104,9 @@ struct HalDisplay
 
 extern HalDisplay halDisplay;
 
-void LoadGLMatrixFromMatrix34(const Matrix34& matrix);
+void LoadModelViewProjectionMatrixFromMatrix34(const Matrix34& matrix);
+void LoadInvertedModelViewMatrixFromMatrix34(const Matrix34& matrix);
+
 #endif
 
 #if defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)

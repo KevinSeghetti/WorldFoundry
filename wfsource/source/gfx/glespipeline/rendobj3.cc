@@ -64,7 +64,8 @@ RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
    );
   globalRendererVariables.GTEMatrix = inverted;
 //  glMatrixMode( GL_MODELVIEW );
-  LoadGLMatrixFromMatrix34(position);
+  LoadModelViewProjectionMatrixFromMatrix34(position);
+
 //
    Primitive* primitive  = _primList[0];
    pRenderObj3DFunc renderer;
