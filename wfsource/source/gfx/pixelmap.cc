@@ -328,7 +328,6 @@ PixelMap::Load(const void* memory, int xOffset, int yOffset, int xSize, int ySiz
         AssertGLOK();
 
         assert(_glTextureName);
-        glActiveTexture ( _activeTextureIndex );
         glBindTexture(GL_TEXTURE_2D,_glTextureName);
 
 #if SIXTEEN_BIT_VRAM

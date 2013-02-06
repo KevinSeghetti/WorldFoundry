@@ -126,7 +126,7 @@ private:
 #else
     GLubyte* _pixelBuffer;
 #endif		                            // sixteen_bit
-#endif          // RENDERER_GL
+#endif          // RENDERER_EGL
 
 
 #if defined(RENDERER_XWINDOWS)
